@@ -1,11 +1,11 @@
 let cacheBuster = 'EXTREME'
 
-document.addEventListener('click', () => {
+document.addEventListener('contextmenu', () => {
     let target = event.target
     if (target.dataset.imageLoaded) return  // set below
     if (target.tagName === 'IMG') {
         let src = target.currentSrc
-        chrome.runtime.sendMessage({dontBlockNextUrl: src + cacheBuster}, response => {
+        chrome.runtime.sendMessage({dontBlockNextUrl: src + cacheBuster}, () => {
             target.srcset = ''
             target.src = src + cacheBuster
             target.dataset.imageLoaded = true  // prevent future click from re downloading
