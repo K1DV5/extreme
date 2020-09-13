@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <style>
+            body {
+                width: 15em;
+                border: 1px solid grey;
+                padding: .5em .5em 0 .5em;
+            }
+
+            button {
+                background: transparent;
+                margin: .5em 0 .5em 0;
+                border: 1px solid grey;
+                padding: .5em
+            }
+
+            button:focus {
+                outline: grey solid 1px
+            }
+
+            textarea {
+                border-color: gray;
+                width: 100%;
+                height: 11em;
+            }
+
+            textarea:focus {
+                outline-color: gray;
+            }
+
+            code {
+                color: green;
+                padding: 0 .5em 0 .5em;
+                background: #00FF0011;
+            }
+
+            #tabs {
+                display: flex;
+                justify-content: flex-end;
+            }
+
+        </style>
+    </head>
+    <body>
+        <div>
+            <input type="checkbox" id="switch" checked="true">
+            <label for="switch">Switched on</label>
+        </div>
+
+        <div id="tabs">
+            <button id="pageOptTab">Page options</button>
+            <button id="customOptTab">Custom list</button>
+        </div>
+
+        <div id="pageOpt">
+            <div>
+                <input type="checkbox" id="image">
+                <label for="image">Images</label>
+            </div>
+
+            <div>
+                <input type="checkbox" id="script">
+                <label for="script">Scripts</label>
+            </div>
+
+            <div>
+                <input type="checkbox" id="font">
+                <label for="font">Fonts</label>
+            </div>
+
+            <div>
+                <input type="checkbox" id="media">
+                <label for="media">Media</label>
+            </div>
+
+            <button id="apply">Apply &amp; reload</button>
+            <button id="save">Save</button>
+        </div>
+
+        <div id="customOpt" style="display: none">
+            <p>The format is <code>url 0010</code>. The <code>url</code> part is the URL, and the numbers correspond to <b>images, scripts, fonts, and media</b> respectively. <code>1</code> means do nor block and <code>0</code> means block. Example: <code>https://www.google.com 0110</code> blocks images and media on the Google homepage.</p>
+            <textarea id="config" name="config"></textarea>
+            <button id="saveConfig">Save</button>
+        </div>
+
+        <script src="popup.js"> </script>
+    </body>
+</html>

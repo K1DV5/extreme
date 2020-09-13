@@ -1,0 +1,4 @@
+**/*.png
+*.crx
+*.pem
+package.json
