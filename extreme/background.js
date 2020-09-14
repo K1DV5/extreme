@@ -38,15 +38,14 @@ function reloadWithTempo(opt) {
     chrome.tabs.reload(opt.tabId)
 }
 
-let dontBlockNextUrl = undefined
+let dontBlockNextUrl = undefined  // can be like {url: ..., redirectTo: ...}
 
 // block
 function block(details) {
-    if (dontBlockNextUrl == details.url) {
-        let url = dontBlockNextUrl
-        if (url.endsWith('EXTREME')) {
-            dontBlockNextUrl = url.slice(0, -7)
-            return {redirectUrl: url.slice(0, -7)}
+    if (dontBlockNextUrl && details.url == dontBlockNextUrl.url) {
+        if (dontBlockNextUrl.redirectTo) {
+            dontBlockNextUrl = {url: dontBlockNextUrl.redirectTo}
+            return {redirectUrl: dontBlockNextUrl.url}
         }
         dontBlockNextUrl = undefined
         return {cancel: false}
