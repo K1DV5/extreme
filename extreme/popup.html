@@ -6,7 +6,7 @@
         <meta http-equiv="X-UA-Compatible" content="ie=edge">
         <style>
             body {
-                width: 15em;
+                width: 16em;
                 border: 1px solid grey;
                 padding: .5em .5em 0 .5em;
             }
@@ -43,17 +43,24 @@
                 justify-content: flex-end;
             }
 
+            .file {
+                border: 1px solid grey;
+                padding: .5em
+            }
+
         </style>
     </head>
     <body>
         <div>
-            <input type="checkbox" id="switch" checked="true">
-            <label for="switch">Switched on</label>
+            <input type="checkbox" id="switch-data" checked="true">
+            <label for="switch-data">Save data</label>
+            <input type="checkbox" id="switch-ad" checked="true">
+            <label for="switch-ad">Block Ads</label>
         </div>
 
         <div id="tabs">
             <button id="pageOptTab">Page options</button>
-            <button id="customOptTab">Custom list</button>
+            <button id="prefTab">Preferences</button>
         </div>
 
         <div id="pageOpt">
@@ -77,14 +84,31 @@
                 <label for="media">Media</label>
             </div>
 
+            <div>
+                <input type="checkbox" id="ad">
+                <label for="media">Ads</label>
+            </div>
+
             <button id="apply">Apply &amp; reload</button>
             <button id="save">Save</button>
         </div>
 
-        <div id="customOpt" style="display: none">
-            <p>The format is <code>url 0010</code>. The <code>url</code> part is the URL, and the numbers correspond to <b>images, scripts, fonts, and media</b> respectively. <code>1</code> means do nor block and <code>0</code> means block. Example: <code>https://www.google.com 0110</code> blocks images and media on the Google homepage.</p>
-            <textarea id="config" name="config"></textarea>
-            <button id="saveConfig">Save</button>
+        <div id="preferences" style="display: none">
+            <fieldset>
+                <legend>Site Cusomizations</legend>
+                <p>The format is <code>url 00100</code>. The <code>url</code> part is the URL, and the numbers correspond to <b>images, scripts, fonts, media, and ads</b> respectively. <code>1</code> means do nor block and <code>0</code> means block. Example: <code>https://www.google.com 01100</code> blocks images, media and ads on the Google homepage.</p>
+                <textarea id="config" name="config"></textarea>
+                <button id="saveConfig">Save</button>
+            </fieldset>
+            <fieldset>
+                <legend>Ads blacklist</legend>
+                <p>Get a hosts file from <a href="https://github.com/StevenBlack/hosts" target="_blank">github.com/StevenBlack/hosts</a> for ad addresses.</p>
+                <label>
+                    <input type="file" id="ad-blacklist-file" style="display: none">
+                    <div class="file">Select file...</div>
+                </label>
+                <p>Last updated: <span id="ad-blacklist-updated"></span></p>
+            </fieldset>
         </div>
 
         <script src="popup.js"> </script>

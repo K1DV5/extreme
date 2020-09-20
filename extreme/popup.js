@@ -3,17 +3,17 @@ let config = bgPage.config
 
 // TABS FOR OPTIONS
 let pageOpt = document.getElementById('pageOpt')
-let customOpt = document.getElementById('customOpt')
+let customOpt = document.getElementById('preferences')
 
 let configText = document.getElementById('config')
 
 document.getElementById('pageOptTab').addEventListener('click', () => {
-    document.body.style.width = '15em'
+    document.body.style.width = '16em'
     pageOpt.style.display = 'block'
     customOpt.style.display = 'none'
 })
 
-document.getElementById('customOptTab').addEventListener('click', () => {
+document.getElementById('prefTab').addEventListener('click', () => {
     document.body.style.width = '25em'
     pageOpt.style.display = 'none'
     customOpt.style.display = 'block'
@@ -24,10 +24,10 @@ document.getElementById('customOptTab').addEventListener('click', () => {
 })
 
 // TURN ON/OFF
-let switchCheck = document.getElementById('switch')
-switchCheck.checked = bgPage.turnedOn
+let switchCheck = document.getElementById('switch-data')
+switchCheck.checked = bgPage.savingOn
 switchCheck.addEventListener('click', () => {
-    if (bgPage.turnedOn) {
+    if (bgPage.savingOn) {
         bgPage.turn(false)
         event.target.checked = false
     } else {
@@ -54,8 +54,8 @@ let checkBoard = [
     document.getElementById('script'),
     document.getElementById('font'),
     document.getElementById('media'),
+    document.getElementById('ad'),
 ]
-let applyButt = document.getElementById('apply');
 
 chrome.tabs.query({active: true}, tabs => {
     let key = new URL(tabs[0].url).origin  // to be checked later in property initiator of details
@@ -88,3 +88,63 @@ document.getElementById('save').addEventListener('click', () => {
     })
 })
 
+// Ad block
+
+// Show last blacklist update time
+let blacklistUpdated = document.getElementById('ad-blacklist-updated')
+chrome.storage.sync.get(['adsBlacklistUpdated'], result => {
+    if (result.adsBlacklistUpdated)
+        blacklistUpdated.innerText = new Date(result.adsBlacklistUpdated).toLocaleString()
+    else
+        blacklistUpdated.innerText = 'never'
+})
+
+// TURN ON/OFF
+let adSwitchCheck = document.getElementById('switch-ad')
+adSwitchCheck.checked = bgPage.adBlockOn
+adSwitchCheck.addEventListener('click', () => {
+    if (bgPage.adBlockOn) {
+        bgPage.turnAdBlock(false)
+        event.target.checked = false
+    } else {
+        bgPage.turnAdBlock(true)
+        event.target.checked = true
+    }
+})
+
+let blacklistFile = document.getElementById('ad-blacklist-file')
+let blacklistLabel = blacklistFile.parentElement.children[1]
+blacklistFile.addEventListener('change', async () => {
+    if (!blacklistFile.files) {
+        blacklistLabel.innerText = 'No file chosen'
+        setTimeout(() => {
+            blacklistLabel.innerText = 'Select file...'
+        }, 1000)
+        return
+    }
+    let text = await blacklistFile.files[0].text()
+    // extract urls
+    let adPatterns = []
+    let afterStevenBlackStart = false
+    for (let line of text.split('\n')) {
+        if (afterStevenBlackStart) {
+            if (line.trim().length && !line.startsWith('#')) {
+                adPatterns.push('*://' + line.trim().split(' ')[1] + '/*')
+            }
+        } else if (line.includes('Start StevenBlack'))
+            afterStevenBlackStart = true
+    }
+    chrome.storage.local.set({adPatterns: adPatterns.join('\n')}, () => {
+        bgPage.adPatterns = adPatterns
+        bgPage.turnAdBlock(true)
+        // save last update time
+        let now = Date.now()
+        chrome.storage.sync.set({adsBlacklistUpdated: now}, () => {
+            blacklistUpdated.innerText = new Date(now).toLocaleString()
+        })
+        blacklistLabel.innerText = 'Updated'
+        setTimeout(() => {
+            blacklistLabel.innerText = 'Select file...'
+        }, 1000)
+    })
+})

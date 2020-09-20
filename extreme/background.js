@@ -1,4 +1,4 @@
-types = ['image', 'script', 'font', 'media'] // what to block, in this order
+types = ['image', 'script', 'font', 'media', 'ad'] // what to block, in this order
 config = {default: types}  // as a global (in window) what to block
 
 function parseConfig(text) {
@@ -12,18 +12,10 @@ function parseConfig(text) {
         else try {
             origin = new URL(url).origin
         } catch {continue}
-        if (isNaN(opt)) opt = '0000'
+        if (isNaN(opt)) opt = '00000'
         config[origin] = types.filter((_, i) => opt[i] !== '1')
     }
 }
-
-chrome.runtime.onInstalled.addListener(function() {
-    chrome.storage.sync.get(['config'], result => {
-        if (result.config) parseConfig(result.config)
-        else chrome.storage.sync.set({config: ''})
-    })
-
-});
 
 tempo = undefined
 
@@ -39,6 +31,7 @@ function reloadWithTempo(opt) {
 }
 
 let dontBlockNextUrl = undefined  // can be like {url: ..., redirectTo: ...}
+let cacheCheckImage = new Image()
 
 // block
 function block(details) {
@@ -58,6 +51,11 @@ function block(details) {
     }
     if (opt.includes(details.type)) {
         if (details.type == 'image') {
+            // check if image is cached
+            cacheCheckImage.src = details.url
+            let cached = cacheCheckImage.complete || cacheCheckImage.width + cacheCheckImage.height
+            cacheCheckImage.src = ''
+            if (cached) return {cancel: false}
             return {redirectUrl: chrome.runtime.getURL('redir/empty.svg')}
         } else if (details.type == 'script') {
             return {redirectUrl: chrome.runtime.getURL('redir/empty.js')}
@@ -67,20 +65,24 @@ function block(details) {
     return {cancel: false}
 }
 
-turnedOn = true
+savingOn = true
 
 function turn(on) {
     if (on) {
         chrome.webRequest.onBeforeRequest.addListener(block,
             {urls: ['http://*/*', 'https://*/*']}, ['blocking'])
-        turnedOn = true
+        savingOn = true
     } else {
         chrome.webRequest.onBeforeRequest.removeListener(block)
-        turnedOn = false
+        savingOn = false
     }
 }
 
-turn(true)  // start blocking
+chrome.storage.sync.get(['config'], result => {
+    if (result.config) parseConfig(result.config)
+    else chrome.storage.sync.set({config: ''})
+    turn(true)  // start blocking
+})
 
 // optionally show images on contextmenu
 chrome.runtime.onMessage.addListener((message, _, sendResponse) => {
@@ -90,3 +92,44 @@ chrome.runtime.onMessage.addListener((message, _, sendResponse) => {
     }
     return true
 })
+
+// --------- Ad blocking ----------------
+
+adBlockOn = true
+adPatterns = ['*://*.doubleclick.net/*']
+
+function blockAds(details) {
+    console.log(details)
+    let opt
+    if (tempo && details.tabId == tempo.tabId) {  // set by popup apply button
+        opt = tempo.block
+    } else {
+        opt = config[details.initiator] || config.default
+    }
+    if (opt.includes('ad')) return {cancel: true}
+    return {cancel: false}
+}
+
+function turnAdBlock(on) {
+    if (on) {
+        if (adBlockOn) {
+            chrome.webRequest.onBeforeRequest.removeListener(blockAds)
+        }
+        chrome.webRequest.onBeforeRequest.addListener(blockAds,
+            {urls: adPatterns}, ['blocking'])
+        adBlockOn = true
+    } else {
+        chrome.webRequest.onBeforeRequest.removeListener(blockAds)
+        adBlockOn = false
+    }
+}
+
+chrome.storage.local.get(['adPatterns'], result => {
+    if (result.adPatterns)
+        adPatterns = []
+        for (let line of result.adPatterns.split('\n')) {
+            adPatterns.push(line)
+        }
+    turnAdBlock(true)
+})
+
