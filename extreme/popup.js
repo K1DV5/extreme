@@ -14,7 +14,7 @@ document.getElementById('pageOptTab').addEventListener('click', () => {
 })
 
 document.getElementById('prefTab').addEventListener('click', () => {
-    document.body.style.width = '25em'
+    document.body.style.width = '28em'
     pageOpt.style.display = 'none'
     customOpt.style.display = 'block'
     // show current state
@@ -70,7 +70,7 @@ document.getElementById('apply').addEventListener('click', () => {
         let tab = tabs[0]
         // temporarily set different options
         let block = bgPage.types.filter((_, i) => !checkBoard[i].checked)
-        bgPage.reloadWithTempo({tabId: tab.id, block})
+        bgPage.reloadWithTempo({tabId: tab.id, block, initiator: new URL(tab.url).origin})
         window.close()
     })
 })
@@ -114,15 +114,8 @@ adSwitchCheck.addEventListener('click', () => {
 
 let blacklistFile = document.getElementById('ad-blacklist-file')
 let blacklistLabel = blacklistFile.parentElement.children[1]
-blacklistFile.addEventListener('change', async () => {
-    if (!blacklistFile.files) {
-        blacklistLabel.innerText = 'No file chosen'
-        setTimeout(() => {
-            blacklistLabel.innerText = 'Select file...'
-        }, 1000)
-        return
-    }
-    let text = await blacklistFile.files[0].text()
+
+function updateBlacklist(text, messageWidget, widgetText) {
     // extract urls
     let adPatterns = []
     let afterStevenBlackStart = false
@@ -142,9 +135,74 @@ blacklistFile.addEventListener('change', async () => {
         chrome.storage.sync.set({adsBlacklistUpdated: now}, () => {
             blacklistUpdated.innerText = new Date(now).toLocaleString()
         })
-        blacklistLabel.innerText = 'Updated'
+        messageWidget.innerText = 'Updated'
+        setTimeout(() => {
+            messageWidget.innerText = widgetText
+        }, 1000)
+    })
+}
+
+blacklistFile.addEventListener('change', async () => {
+    if (!blacklistFile.files) {
+        blacklistLabel.innerText = 'No file chosen'
         setTimeout(() => {
             blacklistLabel.innerText = 'Select file...'
         }, 1000)
+        return
+    }
+    let text = await blacklistFile.files[0].text()
+    updateBlacklist(text, blacklistLabel, 'Select file...')
+})
+
+let blackListUrl = 'https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts'
+
+document.getElementById('update-blacklist').addEventListener('click', () => {
+    let target = event.target
+    target.innerText = 'Updating...'
+    fetch(blackListUrl).then(res => {
+        res.text().then(text => {
+            updateBlacklist(text, target, 'Update')
+        })
     })
 })
+
+
+// YouTube quality
+
+let qualitySelector = document.getElementById('yt-quality')
+
+qualitySelector.value = bgPage.youtubeQuality
+
+qualitySelector.addEventListener('change', () => {
+    let quality = event.target.value
+    chrome.storage.sync.set({youtubeQuality: quality}, () => {
+        bgPage.youtubeQuality = quality
+    })
+})
+
+// show how much is saved so far in session
+if (bgPage.savingHistory.blocked) {
+    let saved = bgPage.savingHistory.blocked
+    let percentage = Math.round(saved / (saved + bgPage.savingHistory.allowed) * 100)
+    let unit = 'B'
+    if (saved > 1024 * 1024) {
+        saved = (saved / 1024 / 1024).toFixed(1)
+        unit = 'MB'
+    } else if (saved > 1024) {
+        saved = Math.round(saved / 1024)
+        unit = 'KB'
+    }
+    let savedInfo = document.getElementById('savedInfo')
+    savedInfo.innerText = 'Saved: ' + saved + unit + ' (' + percentage + '%)'
+    let clear = document.createElement('button')
+    clear.innerHTML = ' &times; '
+    clear.style.padding = '0 .3em 0 .3em'
+    clear.style.marginLeft = '.5em'
+    clear.addEventListener('click', () => {
+        bgPage.savingHistory = {allowed: 0, blocked: 0}
+        savedInfo.innerHTML = ''
+    })
+    savedInfo.appendChild(clear)
+}
+
+chrome.storage.local.set({savingHistory: [bgPage.savingHistory.allowed, bgPage.savingHistory.blocked].join(' ')})

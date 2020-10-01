@@ -20,6 +20,8 @@ function parseConfig(text) {
 tempo = undefined
 
 function reloadWithTempo(opt) {
+    let deflt = config[opt.initiator] || config.default
+    if (opt.block.length == deflt.length && opt.block.every((val, i) => val == deflt[i])) return // no change
     tempo = opt
     let reloadCallback = (tabId, details) => {
         if (tempo && tempo.tabId !== tabId || details.status !== 'complete') return
@@ -31,10 +33,11 @@ function reloadWithTempo(opt) {
 }
 
 let dontBlockNextUrl = undefined  // can be like {url: ..., redirectTo: ...}
-let cacheCheckImage = new Image()
+savingHistory = {allowed: 0, blocked: 0}
 
 // block
 function block(details) {
+    if (details.statusCode == 304) return  // cached
     if (dontBlockNextUrl && details.url == dontBlockNextUrl.url) {
         if (dontBlockNextUrl.redirectTo) {
             dontBlockNextUrl = {url: dontBlockNextUrl.redirectTo}
@@ -50,30 +53,38 @@ function block(details) {
         opt = config[details.initiator] || config.default
     }
     if (opt.includes(details.type)) {
+        for (let entry of details.responseHeaders) {  // record blocked
+            if (entry.name == 'content-length') savingHistory.blocked += Number(entry.value)
+        }
         if (details.type == 'image') {
-            // check if image is cached
-            cacheCheckImage.src = details.url
-            let cached = cacheCheckImage.complete || cacheCheckImage.width + cacheCheckImage.height
-            cacheCheckImage.src = ''
-            if (cached) return {cancel: false}
             return {redirectUrl: chrome.runtime.getURL('redir/empty.svg')}
         } else if (details.type == 'script') {
             return {redirectUrl: chrome.runtime.getURL('redir/empty.js')}
         }
         return {cancel: true}
     }
+    for (let entry of details.responseHeaders) { // record allowed
+        if (entry.name == 'content-length') savingHistory.allowed += Number(entry.value)
+    }
     return {cancel: false}
+}
+
+function savedDataHeader(details) {  // add Save-Data: on header
+    return {requestHeaders: [...details.requestHeaders, {name: 'Save-Data', value: 'on'}]}
 }
 
 savingOn = true
 
 function turn(on) {
     if (on) {
-        chrome.webRequest.onBeforeRequest.addListener(block,
-            {urls: ['http://*/*', 'https://*/*']}, ['blocking'])
+        chrome.webRequest.onHeadersReceived.addListener(block,
+            {urls: ['http://*/*', 'https://*/*']}, ['blocking', 'responseHeaders'])
+        chrome.webRequest.onBeforeSendHeaders.addListener(savedDataHeader,
+            {urls: ['http://*/*', 'https://*/*']}, ['blocking', 'requestHeaders'])
         savingOn = true
     } else {
-        chrome.webRequest.onBeforeRequest.removeListener(block)
+        chrome.webRequest.onHeadersReceived.removeListener(block)
+        chrome.webRequest.onBeforeSendHeaders.removeListener(block)
         savingOn = false
     }
 }
@@ -84,13 +95,12 @@ chrome.storage.sync.get(['config'], result => {
     turn(true)  // start blocking
 })
 
-// optionally show images on contextmenu
-chrome.runtime.onMessage.addListener((message, _, sendResponse) => {
-    if (message.dontBlockNextUrl) {
-        dontBlockNextUrl = message.dontBlockNextUrl
-        sendResponse() // to indicate that what needs to be done here is over
+chrome.storage.local.get(['savingHistory'], result => {
+    // persist saving history
+    if (result.savingHistory) {
+        let [allowed, blocked] = result.savingHistory.split(' ').map(Number)
+        savingHistory = {allowed, blocked}
     }
-    return true
 })
 
 // --------- Ad blocking ----------------
@@ -99,7 +109,6 @@ adBlockOn = true
 adPatterns = ['*://*.doubleclick.net/*']
 
 function blockAds(details) {
-    console.log(details)
     let opt
     if (tempo && details.tabId == tempo.tabId) {  // set by popup apply button
         opt = tempo.block
@@ -133,3 +142,23 @@ chrome.storage.local.get(['adPatterns'], result => {
     turnAdBlock(true)
 })
 
+// YOUTUBE VIDEO QUALITY
+
+youtubeQuality = 'tiny'
+chrome.storage.sync.get(['youtubeQuality'], result => {
+    if (result.youtubeQuality)
+        youtubeQuality = result.youtubeQuality
+    else
+        chrome.storage.sync.set({youtubeQuality})
+})
+
+// MESSAGING WITH PAGE CONTEXT SCRIPTS
+chrome.runtime.onMessage.addListener((message, _, sendResponse) => {
+    if (message.dontBlockNextUrl) { // optionally show images on contextmenu
+        dontBlockNextUrl = message.dontBlockNextUrl
+        sendResponse() // to indicate that what needs to be done here is over
+    } else if (message == 'youtubeQuality') {  // get the desired default youtube playback quality
+        sendResponse(youtubeQuality)
+    }
+    return true
+})

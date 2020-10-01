@@ -56,7 +56,25 @@
             <label for="switch-data">Save data</label>
             <input type="checkbox" id="switch-ad" checked="true">
             <label for="switch-ad">Block Ads</label>
+            <div>
+                <label for="yt-quality">YouTube quality</label>
+                <select id="yt-quality">
+                    <option value="none">Not Set</option>
+                    <option value="tiny">144p</option>
+                    <option value="small">240p</option>
+                    <option value="medium">360p</option>
+                    <option value="large">480p</option>
+                    <option value="hd720">720p</option>
+                    <option value="hd1080">1080p</option>
+                    <option value="hd1440">1440p</option>
+                    <option value="hd2160">2160p 4K</option>
+                    <option value="hd2880">2880p 5K</option>
+                    <option value="highres">8K</option>
+                </select>
+            </div>
         </div>
+
+        <div id="savedInfo"></div>
 
         <div id="tabs">
             <button id="pageOptTab">Page options</button>
@@ -86,10 +104,10 @@
 
             <div>
                 <input type="checkbox" id="ad">
-                <label for="media">Ads</label>
+                <label for="ad">Ads</label>
             </div>
 
-            <button id="apply">Apply &amp; reload</button>
+            <button id="apply">Apply</button>
             <button id="save">Save</button>
         </div>
 
@@ -102,10 +120,11 @@
             </fieldset>
             <fieldset>
                 <legend>Ads blacklist</legend>
-                <p>Get a hosts file from <a href="https://github.com/StevenBlack/hosts" target="_blank">github.com/StevenBlack/hosts</a> for ad addresses.</p>
+                <p>Update from the internet or select a hosts file from <a href="https://github.com/StevenBlack/hosts" target="_blank">github.com/StevenBlack/hosts</a> to update the blacklist.</p>
+                <button id="update-blacklist">Update</button>
                 <label>
                     <input type="file" id="ad-blacklist-file" style="display: none">
-                    <div class="file">Select file...</div>
+                    <span class="file">Select file...</span>
                 </label>
                 <p>Last updated: <span id="ad-blacklist-updated"></span></p>
             </fieldset>
