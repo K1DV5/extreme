@@ -179,30 +179,3 @@ qualitySelector.addEventListener('change', () => {
         bgPage.youtubeQuality = quality
     })
 })
-
-// show how much is saved so far in session
-if (bgPage.savingHistory.blocked) {
-    let saved = bgPage.savingHistory.blocked
-    let percentage = Math.round(saved / (saved + bgPage.savingHistory.allowed) * 100)
-    let unit = 'B'
-    if (saved > 1024 * 1024) {
-        saved = (saved / 1024 / 1024).toFixed(1)
-        unit = 'MB'
-    } else if (saved > 1024) {
-        saved = Math.round(saved / 1024)
-        unit = 'KB'
-    }
-    let savedInfo = document.getElementById('savedInfo')
-    savedInfo.innerText = 'Saved: ' + saved + unit + ' (' + percentage + '%)'
-    let clear = document.createElement('button')
-    clear.innerHTML = ' &times; '
-    clear.style.padding = '0 .3em 0 .3em'
-    clear.style.marginLeft = '.5em'
-    clear.addEventListener('click', () => {
-        bgPage.savingHistory = {allowed: 0, blocked: 0}
-        savedInfo.innerHTML = ''
-    })
-    savedInfo.appendChild(clear)
-}
-
-chrome.storage.local.set({savingHistory: [bgPage.savingHistory.allowed, bgPage.savingHistory.blocked].join(' ')})

@@ -33,18 +33,16 @@ function reloadWithTempo(opt) {
 }
 
 let dontBlockNextUrl = undefined  // can be like {url: ..., redirectTo: ...}
-savingHistory = {allowed: 0, blocked: 0}
 
 // block
 function block(details) {
-    if (details.statusCode == 304) return  // cached
     if (dontBlockNextUrl && details.url == dontBlockNextUrl.url) {
         if (dontBlockNextUrl.redirectTo) {
             dontBlockNextUrl = {url: dontBlockNextUrl.redirectTo}
             return {redirectUrl: dontBlockNextUrl.url}
         }
         dontBlockNextUrl = undefined
-        return {cancel: false}
+        return
     }
     let opt
     if (tempo && details.tabId == tempo.tabId) {  // set by popup apply button
@@ -52,21 +50,13 @@ function block(details) {
     } else {
         opt = config[details.initiator] || config.default
     }
-    if (opt.includes(details.type)) {
-        for (let entry of details.responseHeaders) {  // record blocked
-            if (entry.name == 'content-length') savingHistory.blocked += Number(entry.value)
-        }
-        if (details.type == 'image') {
-            return {redirectUrl: chrome.runtime.getURL('redir/empty.svg')}
-        } else if (details.type == 'script') {
-            return {redirectUrl: chrome.runtime.getURL('redir/empty.js')}
-        }
-        return {cancel: true}
+    if (!opt.includes(details.type)) return
+    if (details.type == 'image') {
+        return {redirectUrl: chrome.runtime.getURL('redir/empty.svg')}
+    } else if (details.type == 'script') {
+        return {redirectUrl: chrome.runtime.getURL('redir/empty.js')}
     }
-    for (let entry of details.responseHeaders) { // record allowed
-        if (entry.name == 'content-length') savingHistory.allowed += Number(entry.value)
-    }
-    return {cancel: false}
+    return {cancel: true}
 }
 
 function savedDataHeader(details) {  // add Save-Data: on header
@@ -77,13 +67,13 @@ savingOn = true
 
 function turn(on) {
     if (on) {
-        chrome.webRequest.onHeadersReceived.addListener(block,
-            {urls: ['http://*/*', 'https://*/*']}, ['blocking', 'responseHeaders'])
+        chrome.webRequest.onBeforeRequest.addListener(block,
+            {urls: ['http://*/*', 'https://*/*']}, ['blocking'])
         chrome.webRequest.onBeforeSendHeaders.addListener(savedDataHeader,
             {urls: ['http://*/*', 'https://*/*']}, ['blocking', 'requestHeaders'])
         savingOn = true
     } else {
-        chrome.webRequest.onHeadersReceived.removeListener(block)
+        chrome.webRequest.onBeforeRequest.removeListener(block)
         chrome.webRequest.onBeforeSendHeaders.removeListener(block)
         savingOn = false
     }
@@ -93,14 +83,6 @@ chrome.storage.sync.get(['config'], result => {
     if (result.config) parseConfig(result.config)
     else chrome.storage.sync.set({config: ''})
     turn(true)  // start blocking
-})
-
-chrome.storage.local.get(['savingHistory'], result => {
-    // persist saving history
-    if (result.savingHistory) {
-        let [allowed, blocked] = result.savingHistory.split(' ').map(Number)
-        savingHistory = {allowed, blocked}
-    }
 })
 
 // --------- Ad blocking ----------------
