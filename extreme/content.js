@@ -1,3 +1,5 @@
+// optionally show images on right click
+
 let cacheBuster = 'EXTREME'
 
 document.addEventListener('contextmenu', () => {

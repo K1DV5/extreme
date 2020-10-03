@@ -1,5 +1,4 @@
 let bgPage = chrome.extension.getBackgroundPage()
-let config = bgPage.config
 
 // TABS FOR OPTIONS
 let pageOpt = document.getElementById('pageOpt')
@@ -39,7 +38,7 @@ switchCheck.addEventListener('click', () => {
 // save button on custom config tab
 document.getElementById('saveConfig').addEventListener('click', () => {
     chrome.extension.getBackgroundPage().parseConfig(configText.value)
-    let newText = Object.entries(config)
+    let newText = Object.entries(bgPage.config)
         .slice(1)
         .map(([url, opt]) => url + ' ' + bgPage.types.map(type => Number(!opt.includes(type))).join(''))
         .join('\n')
@@ -58,10 +57,15 @@ let checkBoard = [
 ]
 
 chrome.tabs.query({active: true}, tabs => {
-    let key = new URL(tabs[0].url).origin  // to be checked later in property initiator of details
-    let opt = config[key] || config.default
-    for (let widget of checkBoard) {
-        widget.checked = !opt.includes(widget.id)
+    let url = new URL(tabs[0].url)
+    if (['http:', 'https:'].includes(url.protocol)) {
+        let opt = bgPage.config[url.origin] || bgPage.config.default  // to be checked later by details.initiator
+        for (let widget of checkBoard) {
+            widget.checked = !opt.includes(widget.id)
+        }
+    } else {  // hide irrelevant parts
+        document.getElementById('pageOptTab').style.display = 'none'
+        document.getElementById('pageOpt').style.display = 'none'
     }
 })
 
@@ -79,8 +83,8 @@ document.getElementById('apply').addEventListener('click', () => {
 document.getElementById('save').addEventListener('click', () => {
     chrome.tabs.query({active: true}, tabs => {
         let key = new URL(tabs[0].url).origin  // to be checked later in property initiator of details
-        config[key] = bgPage.types.filter((_, i) => !checkBoard[i].checked)
-        let newText = Object.entries(config)
+        bgPage.config[key] = bgPage.types.filter((_, i) => !checkBoard[i].checked)
+        let newText = Object.entries(bgPage.config)
             .slice(1)
             .map(([url, opt]) => url + ' ' + bgPage.types.map(type => Number(!opt.includes(type))).join(''))
             .join('\n')
