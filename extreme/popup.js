@@ -36,7 +36,7 @@ switchCheck.addEventListener('click', () => {
 })
 
 // save button on custom config tab
-document.getElementById('saveConfig').addEventListener('click', () => {
+document.getElementById('saveConfig').addEventListener('click', event => {
     chrome.extension.getBackgroundPage().parseConfig(configText.value)
     let newText = Object.entries(bgPage.config)
         .slice(1)
@@ -44,6 +44,9 @@ document.getElementById('saveConfig').addEventListener('click', () => {
         .join('\n')
     chrome.storage.sync.set({config: newText})
     configText.value = newText
+    let prevText = event.target.innerText
+    event.target.innerText = 'Saved'
+    setTimeout(() => event.target.innerText = prevText, 1000)
 })
 
 
@@ -56,12 +59,14 @@ let checkBoard = [
     document.getElementById('ad'),
 ]
 
+let optsAtPopup = []  // options at popup
+
 chrome.tabs.query({active: true}, tabs => {
     let url = new URL(tabs[0].url)
     if (['http:', 'https:'].includes(url.protocol)) {
-        let opt = bgPage.config[url.origin] || bgPage.config.default  // to be checked later by details.initiator
+        optsAtPopup = bgPage.config[url.origin] || bgPage.config.default  // to be checked later by details.initiator
         for (let widget of checkBoard) {
-            widget.checked = !opt.includes(widget.id)
+            widget.checked = !optsAtPopup.includes(widget.id)
         }
     } else {  // hide irrelevant parts
         document.getElementById('pageOptTab').style.display = 'none'
@@ -74,13 +79,23 @@ document.getElementById('apply').addEventListener('click', () => {
         let tab = tabs[0]
         // temporarily set different options
         let block = bgPage.types.filter((_, i) => !checkBoard[i].checked)
-        bgPage.reloadWithTempo({tabId: tab.id, block, initiator: new URL(tab.url).origin})
+        if (block.length == optsAtPopup.length && block.every((val, i) => val == optsAtPopup[i]))
+            return window.close()  // no change
+        let tempo = {tabId: tab.id, block}
+        bgPage.tempo = tempo
+        let reloadCallback = (tabId, details) => {
+            if (tempo && tempo.tabId !== tabId || details.status !== 'complete') return
+            bgPage.tempo = undefined
+            chrome.tabs.onUpdated.removeListener(reloadCallback)
+        }
+        chrome.tabs.onUpdated.addListener(reloadCallback)
+        chrome.tabs.reload(tempo.tabId)
         window.close()
     })
 })
 
 
-document.getElementById('save').addEventListener('click', () => {
+document.getElementById('save').addEventListener('click', event => {
     chrome.tabs.query({active: true}, tabs => {
         let key = new URL(tabs[0].url).origin  // to be checked later in property initiator of details
         bgPage.config[key] = bgPage.types.filter((_, i) => !checkBoard[i].checked)
@@ -89,6 +104,9 @@ document.getElementById('save').addEventListener('click', () => {
             .map(([url, opt]) => url + ' ' + bgPage.types.map(type => Number(!opt.includes(type))).join(''))
             .join('\n')
         chrome.storage.sync.set({config: newText})
+        let prevText = event.target.innerText
+        event.target.innerText = 'Saved'
+        setTimeout(() => event.target.innerText = prevText, 1000)
     })
 })
 

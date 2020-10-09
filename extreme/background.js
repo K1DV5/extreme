@@ -17,22 +17,8 @@ function parseConfig(text) {
     }
 }
 
-tempo = undefined
-
-function reloadWithTempo(opt) {
-    let deflt = config[opt.initiator] || config.default
-    if (opt.block.length == deflt.length && opt.block.every((val, i) => val == deflt[i])) return // no change
-    tempo = opt
-    let reloadCallback = (tabId, details) => {
-        if (tempo && tempo.tabId !== tabId || details.status !== 'complete') return
-        tempo = undefined
-        chrome.tabs.onUpdated.removeListener(reloadCallback)
-    }
-    chrome.tabs.onUpdated.addListener(reloadCallback)
-    chrome.tabs.reload(opt.tabId)
-}
-
-let dontBlockNextUrl = undefined  // can be like {url: ..., redirectTo: ...}
+tempo = undefined  // temporary config, set in popup.js
+let dontBlockNextUrl = undefined  // can be like {url: ..., redirectTo: ...}, set in content.js
 
 // block
 function block(details) {
