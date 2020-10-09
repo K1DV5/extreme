@@ -17,7 +17,7 @@ document.getElementById('prefTab').addEventListener('click', () => {
     pageOpt.style.display = 'none'
     customOpt.style.display = 'block'
     // show current state
-    chrome.storage.sync.get(['config'], result => {
+    chrome.storage.local.get(['config'], result => {
         configText.value = result.config
     })
 })
@@ -42,7 +42,7 @@ document.getElementById('saveConfig').addEventListener('click', event => {
         .slice(1)
         .map(([url, opt]) => url + ' ' + bgPage.types.map(type => Number(!opt.includes(type))).join(''))
         .join('\n')
-    chrome.storage.sync.set({config: newText})
+    chrome.storage.local.set({config: newText})
     configText.value = newText
     let prevText = event.target.innerText
     event.target.innerText = 'Saved'
@@ -103,7 +103,7 @@ document.getElementById('save').addEventListener('click', event => {
             .slice(1)
             .map(([url, opt]) => url + ' ' + bgPage.types.map(type => Number(!opt.includes(type))).join(''))
             .join('\n')
-        chrome.storage.sync.set({config: newText})
+        chrome.storage.local.set({config: newText})
         let prevText = event.target.innerText
         event.target.innerText = 'Saved'
         setTimeout(() => event.target.innerText = prevText, 1000)
@@ -114,7 +114,7 @@ document.getElementById('save').addEventListener('click', event => {
 
 // Show last blacklist update time
 let blacklistUpdated = document.getElementById('ad-blacklist-updated')
-chrome.storage.sync.get(['adsBlacklistUpdated'], result => {
+chrome.storage.local.get(['adsBlacklistUpdated'], result => {
     if (result.adsBlacklistUpdated)
         blacklistUpdated.innerText = new Date(result.adsBlacklistUpdated).toLocaleString()
     else
@@ -154,7 +154,7 @@ function updateBlacklist(text, messageWidget, widgetText) {
         bgPage.turnAdBlock(true)
         // save last update time
         let now = Date.now()
-        chrome.storage.sync.set({adsBlacklistUpdated: now}, () => {
+        chrome.storage.local.set({adsBlacklistUpdated: now}, () => {
             blacklistUpdated.innerText = new Date(now).toLocaleString()
         })
         messageWidget.innerText = 'Updated'
@@ -197,7 +197,7 @@ qualitySelector.value = bgPage.youtubeQuality
 
 qualitySelector.addEventListener('change', () => {
     let quality = event.target.value
-    chrome.storage.sync.set({youtubeQuality: quality}, () => {
+    chrome.storage.local.set({youtubeQuality: quality}, () => {
         bgPage.youtubeQuality = quality
     })
 })

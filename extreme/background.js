@@ -65,9 +65,9 @@ function turn(on) {
     }
 }
 
-chrome.storage.sync.get(['config'], result => {
+chrome.storage.local.get(['config'], result => {
     if (result.config) parseConfig(result.config)
-    else chrome.storage.sync.set({config: ''})
+    else chrome.storage.local.set({config: ''})
     turn(true)  // start blocking
 })
 
@@ -113,11 +113,11 @@ chrome.storage.local.get(['adPatterns'], result => {
 // YOUTUBE VIDEO QUALITY
 
 youtubeQuality = 'tiny'
-chrome.storage.sync.get(['youtubeQuality'], result => {
+chrome.storage.local.get(['youtubeQuality'], result => {
     if (result.youtubeQuality)
         youtubeQuality = result.youtubeQuality
     else
-        chrome.storage.sync.set({youtubeQuality})
+        chrome.storage.local.set({youtubeQuality})
 })
 
 // MESSAGING WITH PAGE CONTEXT SCRIPTS
