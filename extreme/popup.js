@@ -38,15 +38,16 @@ switchCheck.addEventListener('click', () => {
 // save button on custom config tab
 document.getElementById('saveConfig').addEventListener('click', event => {
     chrome.extension.getBackgroundPage().parseConfig(configText.value)
-    let newText = Object.entries(bgPage.config)
-        .slice(1)
-        .map(([url, opt]) => url + ' ' + bgPage.types.map(type => Number(!opt.includes(type))).join(''))
-        .join('\n')
-    chrome.storage.local.set({config: newText})
-    configText.value = newText
-    let prevText = event.target.innerText
-    event.target.innerText = 'Saved'
-    setTimeout(() => event.target.innerText = prevText, 1000)
+    let configs = Object.entries(bgPage.config)
+    if (bgPage.config.default.length == 5) configs = configs.slice(1)
+    // {url: ['images', ...]} => 'url 01000'
+    let newText = configs.map(([url, opt]) => url + ' ' + bgPage.types.map(type => Number(!opt.includes(type))).join('')).join('\n')
+    chrome.storage.local.set({config: newText}, () => {
+        configText.value = newText
+        let prevText = event.target.innerText
+        event.target.innerText = 'Saved'
+        setTimeout(() => event.target.innerText = prevText, 1000)
+    })
 })
 
 
