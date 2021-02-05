@@ -31,15 +31,15 @@ document.addEventListener('contextmenu', () => {
 
 // Set youtube playback quality
 
-if (location.host.endsWith('youtube.com') && (location.pathname == '/watch' || location.pathname.startsWith('/embed/'))) {
+if (location.host.endsWith('youtube.com')) {
     // both youtube video page and embedded
     chrome.runtime.sendMessage('youtubeQuality', quality => {
         if (quality == 'none') return  // chosen by youtube
         let script = document.createElement('script')
         script.innerHTML = `
-            let player = document.querySelector('.html5-video-player')
-            if (player.getAvailableQualityLevels) {
-                // set quality
+            function restrictQuality() {
+                let player = document.querySelector('.html5-video-player')
+                if (!player.getAvailableQualityLevels) return console.log('NOOO!')
                 let quality = '${quality}'
                 // get available levels
                 let availableLevels = player.getAvailableQualityLevels()
@@ -53,9 +53,15 @@ if (location.host.endsWith('youtube.com') && (location.pathname == '/watch' || l
                     player.loadVideoById(player.getVideoData().video_id, player.getCurrentTime(), quality)
                 }
                 console.log('SUCCESS')
-            } else {
-                console.log('NOOO!')
-            }`
+            }
+            restrictQuality()
+            let lastRestrictedUrl = location.href
+            document.getElementsByTagName('video')[0].addEventListener('loadedmetadata', () => {
+                if (location.href == lastRestrictedUrl) return
+                restrictQuality()
+                lastRestrictedUrl = location.href
+            })
+            `
         document.body.appendChild(script)
     })
 }
