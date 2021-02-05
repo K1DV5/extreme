@@ -7,7 +7,7 @@ document.addEventListener('contextmenu', () => {
     if (target.dataset.imageLoaded) return  // set below
     if (target.tagName === 'IMG') {
         let src = target.currentSrc
-        chrome.runtime.sendMessage({dontBlockNextUrl: {url: src + cacheBuster, redirectTo: src}}, () => {
+        chrome.runtime.sendMessage({allowNextUrl: {url: src + cacheBuster, redirectTo: src}}, () => {
             target.srcset = ''
             target.src = src + cacheBuster
             target.dataset.imageLoaded = true  // prevent future click from re downloading
@@ -21,7 +21,7 @@ document.addEventListener('contextmenu', () => {
         let urlBegin = urlIndex + 5
         let urlEnd = bgImg.indexOf('")', urlBegin)
         let url = bgImg.slice(urlBegin, urlEnd)
-        chrome.runtime.sendMessage({dontBlockNextUrl: {url: url + cacheBuster, redirectTo: url}}, () => {
+        chrome.runtime.sendMessage({allowNextUrl: {url: url + cacheBuster, redirectTo: url}}, () => {
             target.style.backgroundImage = 'url("' + url + cacheBuster + '")'
             target.dataset.imageLoaded = true  // prevent future click from re downloading
         })
@@ -33,7 +33,7 @@ document.addEventListener('contextmenu', () => {
 
 if (location.host.endsWith('youtube.com')) {
     // both youtube video page and embedded
-    chrome.runtime.sendMessage('youtubeQuality', quality => {
+    chrome.runtime.sendMessage('ytQuality', quality => {
         if (quality == 'none') return  // chosen by youtube
         let script = document.createElement('script')
         script.innerHTML = `

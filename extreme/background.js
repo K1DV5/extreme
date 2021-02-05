@@ -1,8 +1,16 @@
 types = ['image', 'script', 'font', 'media'] // what to block, in this order
 config = {default: types}  // as a global (in window) what to block
+state = {
+    saving: true,
+    tempo: undefined,  // temporary config, set in popup.js
+    allowNextUrl: undefined,  // can be like {url: ..., redirectTo: ...}, set in content.js
+    ytQuality: 'tiny',
+}
+
 
 function parseConfig(text) {
-    config = {default: types}  // as a global (in window)
+    let lastConf = Object.fromEntries(Object.keys(config).map(url => [url, 1]))  // to remove
+    delete lastConf.default
     for (let line of text.split('\n')) {
         if (!line.trim() || line[0] == '#') continue
         let [url, opt] = line.split(' ')
@@ -14,25 +22,26 @@ function parseConfig(text) {
         } catch {continue}
         if (isNaN(opt)) opt = '00000'
         config[origin] = types.filter((_, i) => opt[i] !== '1')
+        delete lastConf[origin]
+    }
+    for (let url of Object.keys(lastConf)) {
+        delete config[url]
     }
 }
 
-tempo = undefined  // temporary config, set in popup.js
-let dontBlockNextUrl = undefined  // can be like {url: ..., redirectTo: ...}, set in content.js
-
 // block
 function block(details) {
-    if (dontBlockNextUrl && details.url == dontBlockNextUrl.url) {
-        if (dontBlockNextUrl.redirectTo) {
-            dontBlockNextUrl = {url: dontBlockNextUrl.redirectTo}
-            return {redirectUrl: dontBlockNextUrl.url}
+    if (state.allowNextUrl && details.url == state.allowNextUrl.url) {
+        if (state.allowNextUrl.redirectTo) {
+            state.allowNextUrl = {url: state.allowNextUrl.redirectTo}
+            return {redirectUrl: state.allowNextUrl.url}
         }
-        dontBlockNextUrl = undefined
+        state.allowNextUrl = undefined
         return
     }
     let opt
-    if (tempo && details.tabId == tempo.tabId) {  // set by popup apply button
-        opt = tempo.block
+    if (state.tempo && details.tabId == state.tempo.tabId) {  // set by popup apply button
+        opt = state.tempo.block
     } else {
         opt = config[details.initiator] || config.default
     }
@@ -45,49 +54,38 @@ function block(details) {
     return {cancel: true}
 }
 
-function savedDataHeader(details) {  // add Save-Data: on header
+function saveDataHeader(details) {  // add Save-Data: on header
     return {requestHeaders: [...details.requestHeaders, {name: 'Save-Data', value: 'on'}]}
 }
-
-savingOn = true
 
 function turn(on) {
     if (on) {
         chrome.webRequest.onBeforeRequest.addListener(block,
             {urls: ['http://*/*', 'https://*/*']}, ['blocking'])
-        chrome.webRequest.onBeforeSendHeaders.addListener(savedDataHeader,
+        chrome.webRequest.onBeforeSendHeaders.addListener(saveDataHeader,
             {urls: ['http://*/*', 'https://*/*']}, ['blocking', 'requestHeaders'])
-        savingOn = true
+        state.saving = true
     } else {
         chrome.webRequest.onBeforeRequest.removeListener(block)
         chrome.webRequest.onBeforeSendHeaders.removeListener(block)
-        savingOn = false
+        state.saving = false
     }
 }
 
-chrome.storage.local.get(['config'], result => {
-    if (result.config) parseConfig(result.config)
-    else chrome.storage.local.set({config: ''})
+// load configuration
+chrome.storage.local.get(['config', 'ytQuality'], result => {
+    if (result.config) config = result.config
+    if (result.ytQuality) state.ytQuality = result.ytQuality
     turn(true)  // start blocking
-})
-
-// YOUTUBE VIDEO QUALITY
-
-youtubeQuality = 'tiny'
-chrome.storage.local.get(['youtubeQuality'], result => {
-    if (result.youtubeQuality)
-        youtubeQuality = result.youtubeQuality
-    else
-        chrome.storage.local.set({youtubeQuality})
 })
 
 // MESSAGING WITH PAGE CONTEXT SCRIPTS
 chrome.runtime.onMessage.addListener((message, _, sendResponse) => {
-    if (message.dontBlockNextUrl) { // optionally show images on contextmenu
-        dontBlockNextUrl = message.dontBlockNextUrl
+    if (message.allowNextUrl) { // optionally show images on contextmenu
+        state.allowNextUrl = message.allowNextUrl
         sendResponse() // to indicate that what needs to be done here is over
-    } else if (message == 'youtubeQuality') {  // get the desired default youtube playback quality
-        sendResponse(youtubeQuality)
+    } else if (message == 'ytQuality') {  // get the desired default youtube playback quality
+        sendResponse(state.ytQuality)
     }
     return true
 })
