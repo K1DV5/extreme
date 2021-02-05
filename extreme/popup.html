@@ -10,8 +10,6 @@
         <div>
             <input type="checkbox" id="switch-data" checked="true">
             <label for="switch-data">Save data</label>
-            <input type="checkbox" id="switch-ad" checked="true">
-            <label for="switch-ad">Block Ads</label>
             <div>
                 <label for="yt-quality">YouTube quality: </label>
                 <select id="yt-quality">
@@ -56,32 +54,15 @@
                 <label for="media">Media</label>
             </div>
 
-            <div>
-                <input type="checkbox" id="ad">
-                <label for="ad">Ads</label>
-            </div>
-
             <button id="apply">Apply</button>
             <button id="save">Save</button>
         </div>
 
         <div id="preferences" style="display: none">
-            <fieldset>
-                <legend>Site Cusomizations</legend>
-                <p>The format is <code>&lt;url&gt; &lt;images&gt;&lt;scripts&gt;&lt;fonts&gt;&lt;media&gt;&lt;ads&gt;</code>. <code>1</code> means do not block and <code>0</code> means block. <code>https://example.com 01100</code> blocks images, media and ads on Example domain.</p>
-                <textarea id="config" name="config"></textarea>
-                <button id="saveConfig">Save</button>
-            </fieldset>
-            <fieldset>
-                <legend>Ads blacklist</legend>
-                <p>Update from the internet or select a hosts file from <a href="https://github.com/StevenBlack/hosts" target="_blank">github.com/StevenBlack/hosts</a> to update the blacklist.</p>
-                <button id="update-blacklist">Update</button>
-                <label>
-                    <input type="file" id="ad-blacklist-file" style="display: none">
-                    <span class="file">Select file...</span>
-                </label>
-                <p>Last updated: <span id="ad-blacklist-updated"></span></p>
-            </fieldset>
+            <h3>Site preferences</h3>
+            <p>The format is <code>&lt;url&gt; &lt;images&gt;&lt;scripts&gt;&lt;fonts&gt;&lt;media&gt;</code>. <code>1</code> means do not block and <code>0</code> means block. <code>https://example.com 01100</code> blocks images and media on Example domain.</p>
+            <textarea id="config" name="config"></textarea>
+            <button id="saveConfig">Save</button>
         </div>
 
         <script src="popup.js"> </script>

@@ -57,7 +57,6 @@ let checkBoard = [
     document.getElementById('script'),
     document.getElementById('font'),
     document.getElementById('media'),
-    document.getElementById('ad'),
 ]
 
 let optsAtPopup = []  // options at popup
@@ -110,85 +109,6 @@ document.getElementById('save').addEventListener('click', event => {
         setTimeout(() => event.target.innerText = prevText, 1000)
     })
 })
-
-// Ad block
-
-// Show last blacklist update time
-let blacklistUpdated = document.getElementById('ad-blacklist-updated')
-chrome.storage.local.get(['adsBlacklistUpdated'], result => {
-    if (result.adsBlacklistUpdated)
-        blacklistUpdated.innerText = new Date(result.adsBlacklistUpdated).toLocaleString()
-    else
-        blacklistUpdated.innerText = 'never'
-})
-
-// TURN ON/OFF
-let adSwitchCheck = document.getElementById('switch-ad')
-adSwitchCheck.checked = bgPage.adBlockOn
-adSwitchCheck.addEventListener('click', () => {
-    if (bgPage.adBlockOn) {
-        bgPage.turnAdBlock(false)
-        event.target.checked = false
-    } else {
-        bgPage.turnAdBlock(true)
-        event.target.checked = true
-    }
-})
-
-let blacklistFile = document.getElementById('ad-blacklist-file')
-let blacklistLabel = blacklistFile.parentElement.children[1]
-
-function updateBlacklist(text, messageWidget, widgetText) {
-    // extract urls
-    let adPatterns = []
-    let afterStevenBlackStart = false
-    for (let line of text.split('\n')) {
-        if (afterStevenBlackStart) {
-            if (line.trim().length && !line.startsWith('#')) {
-                adPatterns.push('*://' + line.trim().split(' ')[1] + '/*')
-            }
-        } else if (line.includes('Start StevenBlack'))
-            afterStevenBlackStart = true
-    }
-    chrome.storage.local.set({adPatterns: adPatterns.join('\n')}, () => {
-        bgPage.adPatterns = adPatterns
-        bgPage.turnAdBlock(true)
-        // save last update time
-        let now = Date.now()
-        chrome.storage.local.set({adsBlacklistUpdated: now}, () => {
-            blacklistUpdated.innerText = new Date(now).toLocaleString()
-        })
-        messageWidget.innerText = 'Updated'
-        setTimeout(() => {
-            messageWidget.innerText = widgetText
-        }, 1000)
-    })
-}
-
-blacklistFile.addEventListener('change', async () => {
-    if (!blacklistFile.files) {
-        blacklistLabel.innerText = 'No file chosen'
-        setTimeout(() => {
-            blacklistLabel.innerText = 'Select file...'
-        }, 1000)
-        return
-    }
-    let text = await blacklistFile.files[0].text()
-    updateBlacklist(text, blacklistLabel, 'Select file...')
-})
-
-let blackListUrl = 'https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts'
-
-document.getElementById('update-blacklist').addEventListener('click', () => {
-    let target = event.target
-    target.innerText = 'Updating...'
-    fetch(blackListUrl).then(res => {
-        res.text().then(text => {
-            updateBlacklist(text, target, 'Update')
-        })
-    })
-})
-
 
 // YouTube quality
 

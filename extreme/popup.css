@@ -36,11 +36,6 @@ code {
     justify-content: flex-end;
 }
 
-.file {
-    border: 1px solid grey;
-    padding: .5em
-}
-
 select {
     appearance: none
 }

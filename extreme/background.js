@@ -1,4 +1,4 @@
-types = ['image', 'script', 'font', 'media', 'ad'] // what to block, in this order
+types = ['image', 'script', 'font', 'media'] // what to block, in this order
 config = {default: types}  // as a global (in window) what to block
 
 function parseConfig(text) {
@@ -69,45 +69,6 @@ chrome.storage.local.get(['config'], result => {
     if (result.config) parseConfig(result.config)
     else chrome.storage.local.set({config: ''})
     turn(true)  // start blocking
-})
-
-// --------- Ad blocking ----------------
-
-adBlockOn = true
-adPatterns = ['*://*.doubleclick.net/*']
-
-function blockAds(details) {
-    let opt
-    if (tempo && details.tabId == tempo.tabId) {  // set by popup apply button
-        opt = tempo.block
-    } else {
-        opt = config[details.initiator] || config.default
-    }
-    if (opt.includes('ad')) return {cancel: true}
-    return {cancel: false}
-}
-
-function turnAdBlock(on) {
-    if (on) {
-        if (adBlockOn) {
-            chrome.webRequest.onBeforeRequest.removeListener(blockAds)
-        }
-        chrome.webRequest.onBeforeRequest.addListener(blockAds,
-            {urls: adPatterns}, ['blocking'])
-        adBlockOn = true
-    } else {
-        chrome.webRequest.onBeforeRequest.removeListener(blockAds)
-        adBlockOn = false
-    }
-}
-
-chrome.storage.local.get(['adPatterns'], result => {
-    if (result.adPatterns)
-        adPatterns = []
-        for (let line of result.adPatterns.split('\n')) {
-            adPatterns.push(line)
-        }
-    turnAdBlock(true)
 })
 
 // YOUTUBE VIDEO QUALITY
