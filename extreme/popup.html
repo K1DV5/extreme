@@ -4,55 +4,7 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta http-equiv="X-UA-Compatible" content="ie=edge">
-        <style>
-            body {
-                width: 16em;
-                border: 1px solid grey;
-                padding: .5em .5em 0 .5em;
-            }
-
-            button {
-                background: transparent;
-                margin: .5em 0 .5em 0;
-                border: 1px solid grey;
-                padding: .5em
-            }
-
-            button:focus {
-                outline: grey solid 1px
-            }
-
-            textarea {
-                border-color: gray;
-                width: 100%;
-                height: 11em;
-            }
-
-            textarea:focus {
-                outline-color: gray;
-            }
-
-            code {
-                color: green;
-                padding: 0 .5em 0 .5em;
-                background: #00FF0011;
-            }
-
-            #tabs {
-                display: flex;
-                justify-content: flex-end;
-            }
-
-            .file {
-                border: 1px solid grey;
-                padding: .5em
-            }
-
-            select {
-                appearance: none
-            }
-
-        </style>
+        <link rel="stylesheet" href="popup.css">
     </head>
     <body>
         <div>
@@ -116,7 +68,7 @@
         <div id="preferences" style="display: none">
             <fieldset>
                 <legend>Site Cusomizations</legend>
-                <p>The format is <code>&lt;url&gt; &lt;images&gt;&lt;scripts&gt;&lt;fonts&gt;&lt;media&gt;&lt;ads&gt;</code>. <code>1</code> means do not block and <code>0</code> means block. Example: <code>https://www.google.com 01100</code> blocks images, media and ads on the Google homepage.</p>
+                <p>The format is <code>&lt;url&gt; &lt;images&gt;&lt;scripts&gt;&lt;fonts&gt;&lt;media&gt;&lt;ads&gt;</code>. <code>1</code> means do not block and <code>0</code> means block. <code>https://example.com 01100</code> blocks images, media and ads on Example domain.</p>
                 <textarea id="config" name="config"></textarea>
                 <button id="saveConfig">Save</button>
             </fieldset>
