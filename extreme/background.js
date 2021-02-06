@@ -1,5 +1,5 @@
 types = ['image', 'script', 'font', 'media'] // what to block, in this order
-config = {default: types}  // as a global (in window) what to block
+config = {default: []}  // as a global (in window) what to block
 state = {
     saving: true,
     tempo: undefined,  // temporary config, set in popup.js
@@ -8,30 +8,9 @@ state = {
 }
 
 
-function parseConfig(text) {
-    let lastConf = Object.fromEntries(Object.keys(config).map(url => [url, 1]))  // to remove
-    delete lastConf.default
-    for (let line of text.split('\n')) {
-        if (!line.trim() || line[0] == '#') continue
-        let [url, opt] = line.split(' ')
-        let origin
-        if (url == 'default')
-            origin = url
-        else try {
-            origin = new URL(url).origin
-        } catch {continue}
-        if (isNaN(opt)) opt = '00000'
-        config[origin] = types.filter((_, i) => opt[i] !== '1')
-        delete lastConf[origin]
-    }
-    for (let url of Object.keys(lastConf)) {
-        delete config[url]
-    }
-}
-
 // block
 function block(details) {
-    if (state.allowNextUrl && details.url == state.allowNextUrl.url) {
+    if (details.url == state.allowNextUrl?.url) {
         if (state.allowNextUrl.redirectTo) {
             state.allowNextUrl = {url: state.allowNextUrl.redirectTo}
             return {redirectUrl: state.allowNextUrl.url}
@@ -45,7 +24,7 @@ function block(details) {
     } else {
         opt = config[details.initiator] || config.default
     }
-    if (!opt.includes(details.type)) return
+    if (opt.includes(details.type)) return
     if (details.type == 'image') {
         return {redirectUrl: chrome.runtime.getURL('redir/empty.svg')}
     } else if (details.type == 'script') {

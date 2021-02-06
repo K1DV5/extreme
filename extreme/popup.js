@@ -1,4 +1,4 @@
-let {state, types, config, parseConfig, turn} = chrome.extension.getBackgroundPage()
+let {state, types, config, turn} = chrome.extension.getBackgroundPage()
 
 // TABS FOR OPTIONS
 let pageOpt = document.getElementById('pageOpt')
@@ -18,7 +18,7 @@ document.getElementById('prefTab').addEventListener('click', () => {
     customOpt.style.display = 'block'
     // show current config
     configText.value = Object.entries(config)
-        .map(([url, opt]) => url + ' ' + types.map(type => Number(!opt.includes(type))).join(''))
+        .map(([url, opt]) => url + ' ' + types.map(type => Number(opt.includes(type))).join(''))
         .join('\n')
 })
 
@@ -50,14 +50,9 @@ let currentTabId
 
 
 function updateSwitchBoard() {
-    if (['http:', 'https:'].includes(currentTabUrl.protocol)) {
-        let pageOpt = config[currentTabUrl.origin] || config.default  // to be checked later by details.initiator
-        for (let widget of checkBoard) {
-            widget.checked = !pageOpt.includes(widget.id)
-        }
-    } else {  // hide irrelevant parts
-        document.getElementById('pageOptTab').style.display = 'none'
-        document.getElementById('pageOpt').style.display = 'none'
+    let pageOpt = config[currentTabUrl.origin] || config.default  // to be checked later by details.initiator
+    for (let widget of checkBoard) {
+        widget.checked = pageOpt.includes(widget.id)
     }
 }
 
@@ -66,11 +61,17 @@ chrome.tabs.query({active: true}, tabs => {
     currentTabUrl = new URL(tabs[0].url)
     pageOptAtPopup = config[currentTabUrl.origin] || config.default
     updateSwitchBoard()
+    if (['http:', 'https:'].includes(currentTabUrl.protocol)) {
+        return
+    }
+    // hide irrelevant parts
+    document.getElementById('pageOptTab').style.display = 'none'
+    document.getElementById('pageOpt').style.display = 'none'
 })
 
 document.getElementById('apply').addEventListener('click', () => {
     // temporarily set different options
-    let block = types.filter((_, i) => !checkBoard[i].checked)
+    let block = types.filter((_, i) => checkBoard[i].checked)
     if (block.length == pageOptAtPopup.length && block.every((val, i) => val == pageOptAtPopup[i]))
         return window.close()  // no change
     state.tempo = {tabId: currentTabId, block}
@@ -87,7 +88,7 @@ document.getElementById('apply').addEventListener('click', () => {
 
 document.getElementById('save').addEventListener('click', event => {
     let key = currentTabUrl.origin  // to be checked later in property initiator of details
-    config[key] = types.filter((_, i) => !checkBoard[i].checked)
+    config[key] = types.filter((_, i) => checkBoard[i].checked)
     chrome.storage.local.set({config})
     let prevText = event.target.innerText
     event.target.innerText = 'Saved'
@@ -96,12 +97,29 @@ document.getElementById('save').addEventListener('click', event => {
 
 // save button on custom config tab
 document.getElementById('save-config').addEventListener('click', event => {
-    parseConfig(configText.value)
-    // {url: ['images', ...]} => 'url 01000'
-    let newText = Object.entries(config)
-        .map(([url, opt]) => url + ' ' + types
-            .map(type => Number(!opt.includes(type))).join(''))
-        .join('\n')
+    let toRemove = Object.fromEntries(Object.keys(config).map(url => [url, 1]))
+    delete toRemove.default
+    let newText = ''
+    for (let line of configText.value.split('\n')) {
+        if (!line.trim() || line[0] == '#') continue
+        let [url, opt] = line.split(' ')
+        let origin
+        if (url == 'default')
+            origin = url
+        else try {
+            origin = new URL(url).origin
+        } catch {continue}
+        if (isNaN(opt)) {
+            toRemove[origin] = 1
+            continue
+        }
+        config[origin] = types.filter((_, i) => opt[i] == 1)
+        delete toRemove[origin]
+        newText += line + '\n'
+    }
+    for (let url of Object.keys(toRemove)) {
+        delete config[url]
+    }
     chrome.storage.local.set({config}, () => {
         configText.value = newText
         let prevText = event.target.innerText
