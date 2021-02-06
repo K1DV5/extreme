@@ -43,11 +43,15 @@ let checkBoard = [
     document.getElementById('media'),
 ]
 
-let currentPageUrl
+let currentTabUrl
+// state of the config for the page when the popup was opened
+let pageOptAtPopup
+let currentTabId
+
 
 function updateSwitchBoard() {
-    if (['http:', 'https:'].includes(currentPageUrl.protocol)) {
-        let pageOpt = config[currentPageUrl.origin] || config.default  // to be checked later by details.initiator
+    if (['http:', 'https:'].includes(currentTabUrl.protocol)) {
+        let pageOpt = config[currentTabUrl.origin] || config.default  // to be checked later by details.initiator
         for (let widget of checkBoard) {
             widget.checked = !pageOpt.includes(widget.id)
         }
@@ -58,44 +62,40 @@ function updateSwitchBoard() {
 }
 
 chrome.tabs.query({active: true}, tabs => {
-    currentPageUrl = new URL(tabs[0].url)
+    currentTabId = tabs[0].id
+    currentTabUrl = new URL(tabs[0].url)
+    pageOptAtPopup = config[currentTabUrl.origin] || config.default
+    updateSwitchBoard()
 })
 
 document.getElementById('apply').addEventListener('click', () => {
-    chrome.tabs.query({active: true}, tabs => {
-        let tab = tabs[0]
-        // temporarily set different options
-        let block = types.filter((_, i) => !checkBoard[i].checked)
-        let pageOpt = config[currentPageUrl.origin]
-        if (block.length == pageOpt.length && block.every((val, i) => val == pageOpt[i]))
-            return window.close()  // no change
-        let tempo = {tabId: tab.id, block}
-        state.tempo = tempo
-        let reloadCallback = (tabId, details) => {
-            if (tempo && tempo.tabId !== tabId || details.status !== 'complete') return
-            state.tempo = undefined
-            chrome.tabs.onUpdated.removeListener(reloadCallback)
-        }
-        chrome.tabs.onUpdated.addListener(reloadCallback)
-        chrome.tabs.reload(tempo.tabId)
-        window.close()
-    })
+    // temporarily set different options
+    let block = types.filter((_, i) => !checkBoard[i].checked)
+    if (block.length == pageOptAtPopup.length && block.every((val, i) => val == pageOptAtPopup[i]))
+        return window.close()  // no change
+    state.tempo = {tabId: currentTabId, block}
+    let reloadCallback = (tabId, details) => {
+        if (state.tempo && state.tempo.tabId !== tabId || details.status !== 'complete') return
+        state.tempo = undefined
+        chrome.tabs.onUpdated.removeListener(reloadCallback)
+    }
+    chrome.tabs.onUpdated.addListener(reloadCallback)
+    chrome.tabs.reload(state.tempo.tabId)
+    window.close()
 })
 
 
 document.getElementById('save').addEventListener('click', event => {
-    chrome.tabs.query({active: true}, tabs => {
-        let key = new URL(tabs[0].url).origin  // to be checked later in property initiator of details
-        config[key] = types.filter((_, i) => !checkBoard[i].checked)
-        chrome.storage.local.set({config})
-        let prevText = event.target.innerText
-        event.target.innerText = 'Saved'
-        setTimeout(() => event.target.innerText = prevText, 1000)
-    })
+    let key = currentTabUrl.origin  // to be checked later in property initiator of details
+    config[key] = types.filter((_, i) => !checkBoard[i].checked)
+    chrome.storage.local.set({config})
+    let prevText = event.target.innerText
+    event.target.innerText = 'Saved'
+    setTimeout(() => event.target.innerText = prevText, 1000)
 })
 
 // save button on custom config tab
-document.getElementById('saveConfig').addEventListener('click', event => {
+document.getElementById('save-config').addEventListener('click', event => {
     parseConfig(configText.value)
     // {url: ['images', ...]} => 'url 01000'
     let newText = Object.entries(config)
