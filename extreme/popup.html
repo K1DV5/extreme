@@ -7,11 +7,48 @@
         <link rel="stylesheet" href="popup.css">
     </head>
     <body>
-        <div>
-            <input type="checkbox" id="switch-data" checked="true">
-            <label for="switch-data">Save data</label>
+        <header>
+            <div>Extreme</div>
+            <span id="settings">&#9881;</span>
+        </header>
+
+        <div id="pageOpt">
             <div>
-                <label for="yt-quality">YouTube quality: </label>
+                <code id="origin"></code>
+            </div>
+            <div>
+                <div>
+                    <input type="checkbox" id="script">
+                    <label for="script">Scripts</label>
+                </div>
+
+                <div>
+                    <input type="checkbox" id="image">
+                    <label for="image">Images</label>
+                </div>
+
+                <div>
+                    <input type="checkbox" id="font">
+                    <label for="font">Fonts</label>
+                </div>
+
+                <div>
+                    <input type="checkbox" id="media">
+                    <label for="media">Media</label>
+                </div>
+
+                <button id="apply">Apply</button>
+                <button id="save">Save</button>
+            </div>
+        </div>
+
+        <div id="preferences" style="display: none">
+            <div class="left-right">
+                <label for="switch-data">Status</label>
+                <input type="checkbox" id="switch-data" checked="true">
+            </div>
+            <div class="left-right">
+                <label for="yt-quality">YouTube quality</label>
                 <select id="yt-quality">
                     <option value="none">Not Set</option>
                     <option value="tiny">144p</option>
@@ -26,43 +63,20 @@
                     <option value="highres">8K</option>
                 </select>
             </div>
-        </div>
-
-        <div id="tabs">
-            <button id="pageOptTab">Page options</button>
-            <button id="prefTab">Preferences</button>
-        </div>
-
-        <div id="pageOpt">
             <div>
-                <input type="checkbox" id="image">
-                <label for="image">Images</label>
+                <div>Options by site</div>
+                <br>
+                <div>
+                    <textarea id="config" name="config"></textarea>
+                    <div id="by-site-help">
+                        The format is:
+                        <pre>&lt;url&gt; &lt;images&gt;&lt;scripts&gt;&lt;fonts&gt;&lt;media&gt;</pre>
+                        <code>1</code> means do not block and <code>0</code> means block.
+                        <code>https://example.com 01100</code> blocks images and media on Example domain.
+                    </div>
+                </div>
+                <button id="save-config">Save</button>
             </div>
-
-            <div>
-                <input type="checkbox" id="script">
-                <label for="script">Scripts</label>
-            </div>
-
-            <div>
-                <input type="checkbox" id="font">
-                <label for="font">Fonts</label>
-            </div>
-
-            <div>
-                <input type="checkbox" id="media">
-                <label for="media">Media</label>
-            </div>
-
-            <button id="apply">Apply</button>
-            <button id="save">Save</button>
-        </div>
-
-        <div id="preferences" style="display: none">
-            <h3>Site preferences</h3>
-            <p>The format is <code>&lt;url&gt; &lt;images&gt;&lt;scripts&gt;&lt;fonts&gt;&lt;media&gt;</code>. <code>1</code> means do not block and <code>0</code> means block. <code>https://example.com 01100</code> blocks images and media on Example domain.</p>
-            <textarea id="config" name="config"></textarea>
-            <button id="save-config">Save</button>
         </div>
 
         <script src="popup.js"> </script>

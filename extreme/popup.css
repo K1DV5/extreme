@@ -1,18 +1,42 @@
+* {
+    box-sizing: border-box
+}
+
 body {
     width: 16em;
-    border: 1px solid grey;
-    padding: .5em .5em 0 .5em;
+    /* padding: .5em .5em 0 .5em; */
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    background-color: #0060B0;
+    padding: .5em;
+    font-weight: bold;
+    font-size: 120%;
+}
+
+#settings {
+    font-size: 120%;
+    cursor: pointer;
 }
 
 button {
     background: transparent;
     margin: .5em 0 .5em 0;
     border: 1px solid grey;
-    padding: .5em
+    padding: .4em 1em;
+    border-radius: .3em;
+    color: #0060B0;
+    font-weight: bold;
 }
 
 button:focus {
-    outline: grey solid 1px
+    outline: none;
+}
+
+button:active {
+    background: grey;
 }
 
 textarea {
@@ -25,17 +49,28 @@ textarea:focus {
     outline-color: gray;
 }
 
-code {
-    color: green;
+code, pre {
+    color: cyan;
     padding: 0 .5em 0 .5em;
-    background: #00FF0011;
+    background: #0FF1;
 }
 
-#tabs {
-    display: flex;
-    justify-content: flex-end;
+#by-site-help {
+    font-size: 90%;
 }
 
 select {
     appearance: none
+}
+
+#pageOpt > div, #preferences > div {
+    margin-top: 1em;
+    background-color: #8882;
+    padding: .5em;
+    border-radius: .3em;
+}
+
+.left-right {
+    display: flex;
+    justify-content: space-between;
 }

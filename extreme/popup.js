@@ -3,27 +3,33 @@ let {state, types, config, turn} = chrome.extension.getBackgroundPage()
 // TABS FOR OPTIONS
 let pageOpt = document.getElementById('pageOpt')
 let customOpt = document.getElementById('preferences')
-
 let configText = document.getElementById('config')
+let ytQuality = document.getElementById('yt-quality')
+ytQuality.value = state.ytQuality
+let switchCheck = document.getElementById('switch-data')
 
-document.getElementById('pageOptTab').addEventListener('click', () => {
-    document.body.style.width = '16em'
-    pageOpt.style.display = 'block'
-    customOpt.style.display = 'none'
-})
+let currentTabUrl
+// state of the config for the page when the popup was opened
+let pageOptAtPopup
+let currentTabId
 
-document.getElementById('prefTab').addEventListener('click', () => {
-    document.body.style.width = '28em'
-    pageOpt.style.display = 'none'
-    customOpt.style.display = 'block'
-    // show current config
-    configText.value = Object.entries(config)
-        .map(([url, opt]) => url + ' ' + types.map(type => Number(opt.includes(type))).join(''))
-        .join('\n')
+document.getElementById('settings').addEventListener('click', () => {
+    if (customOpt.style.display == 'block') {
+        document.body.style.width = '16em'
+        pageOpt.style.display = 'block'
+        customOpt.style.display = 'none'
+    } else {
+        document.body.style.width = '28em'
+        pageOpt.style.display = 'none'
+        customOpt.style.display = 'block'
+        // show current config
+        configText.value = Object.entries(config)
+            .map(([url, opt]) => url + ' ' + types.map(type => Number(opt.includes(type))).join(''))
+            .join('\n')
+    }
 })
 
 // TURN ON/OFF
-let switchCheck = document.getElementById('switch-data')
 switchCheck.checked = state.saving
 switchCheck.addEventListener('click', () => {
     if (state.saving) {
@@ -43,30 +49,26 @@ let checkBoard = [
     document.getElementById('media'),
 ]
 
-let currentTabUrl
-// state of the config for the page when the popup was opened
-let pageOptAtPopup
-let currentTabId
-
-
 function updateSwitchBoard() {
-    let pageOpt = config[currentTabUrl.origin] || config.default  // to be checked later by details.initiator
+    let pageOpt = config[currentTabUrl] || config.default  // to be checked later by details.initiator
     for (let widget of checkBoard) {
         widget.checked = pageOpt.includes(widget.id)
     }
 }
 
 chrome.tabs.query({active: true}, tabs => {
-    currentTabId = tabs[0].id
-    currentTabUrl = new URL(tabs[0].url)
-    pageOptAtPopup = config[currentTabUrl.origin] || config.default
-    updateSwitchBoard()
-    if (['http:', 'https:'].includes(currentTabUrl.protocol)) {
-        return
+    let url = new URL(tabs[0].url)
+    if (['http:', 'https:'].includes(url.protocol)) {
+        currentTabId = tabs[0].id
+        currentTabUrl = url.origin
+        pageOptAtPopup = config[currentTabUrl] || config.default
+    } else {
+        currentTabUrl = 'default'
+        // apply not needed
+        document.getElementById('apply').disabled = true
     }
-    // hide irrelevant parts
-    document.getElementById('pageOptTab').style.display = 'none'
-    document.getElementById('pageOpt').style.display = 'none'
+    updateSwitchBoard()
+    document.getElementById('origin').innerText = currentTabUrl
 })
 
 document.getElementById('apply').addEventListener('click', () => {
@@ -87,7 +89,7 @@ document.getElementById('apply').addEventListener('click', () => {
 
 
 document.getElementById('save').addEventListener('click', event => {
-    let key = currentTabUrl.origin  // to be checked later in property initiator of details
+    let key = currentTabUrl  // to be checked later in property initiator of details
     config[key] = types.filter((_, i) => checkBoard[i].checked)
     chrome.storage.local.set({config})
     let prevText = event.target.innerText
@@ -120,25 +122,13 @@ document.getElementById('save-config').addEventListener('click', event => {
     for (let url of Object.keys(toRemove)) {
         delete config[url]
     }
-    chrome.storage.local.set({config}, () => {
+    let quality = ytQuality.value
+    chrome.storage.local.set({config, ytQuality: quality}, () => {
         configText.value = newText
         let prevText = event.target.innerText
         event.target.innerText = 'Saved'
         setTimeout(() => event.target.innerText = prevText, 1000)
         updateSwitchBoard()
-    })
-})
-
-
-// YouTube quality
-
-let qualitySelector = document.getElementById('yt-quality')
-
-qualitySelector.value = state.ytQuality
-
-qualitySelector.addEventListener('change', () => {
-    let quality = event.target.value
-    chrome.storage.local.set({ytQuality: quality}, () => {
         state.ytQuality = quality
     })
 })
