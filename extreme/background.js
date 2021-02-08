@@ -10,7 +10,7 @@ state = {
 
 // block
 function block(details) {
-    if (details.url == state.allowNextUrl?.url) {
+    if (state.allowNextUrl && details.url == state.allowNextUrl.url) {
         if (state.allowNextUrl.redirectTo) {
             state.allowNextUrl = {url: state.allowNextUrl.redirectTo}
             return {redirectUrl: state.allowNextUrl.url}
@@ -40,7 +40,7 @@ function saveDataHeader(details) {  // add Save-Data: on header
 function turn(on) {
     if (on) {
         chrome.webRequest.onBeforeRequest.addListener(block,
-            {urls: ['http://*/*', 'https://*/*']}, ['blocking'])
+            {urls: ['http://*/*', 'https://*/*'], types}, ['blocking'])
         chrome.webRequest.onBeforeSendHeaders.addListener(saveDataHeader,
             {urls: ['http://*/*', 'https://*/*']}, ['blocking', 'requestHeaders'])
         state.saving = true
