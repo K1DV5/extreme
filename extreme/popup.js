@@ -5,7 +5,6 @@ let pageOpt = document.getElementById('pageOpt')
 let customOpt = document.getElementById('preferences')
 let configText = document.getElementById('config')
 let ytQuality = document.getElementById('yt-quality')
-ytQuality.value = state.ytQuality
 let switchCheck = document.getElementById('switch-data')
 
 let currentTabUrl
@@ -13,24 +12,7 @@ let currentTabUrl
 let pageOptAtPopup
 let currentTabId
 
-document.getElementById('settings').addEventListener('click', () => {
-    if (customOpt.style.display == 'block') {
-        document.body.style.width = '16em'
-        pageOpt.style.display = 'block'
-        customOpt.style.display = 'none'
-    } else {
-        document.body.style.width = '28em'
-        pageOpt.style.display = 'none'
-        customOpt.style.display = 'block'
-        // show current config
-        configText.value = Object.entries(config)
-            .map(([url, opt]) => url + ' ' + types.map(type => Number(opt.includes(type))).join(''))
-            .join('\n')
-    }
-})
-
 // TURN ON/OFF
-switchCheck.checked = state.saving
 switchCheck.addEventListener('click', () => {
     if (state.saving) {
         turn(false)
@@ -38,6 +20,18 @@ switchCheck.addEventListener('click', () => {
     } else {
         turn(true)
         event.target.checked = true
+    }
+})
+
+document.getElementById('settings').addEventListener('change', () => {
+    if (event.target.checked) {  // show settings updated
+        switchCheck.checked = state.saving
+        configText.value = Object.entries(config)
+            .map(([url, opt]) => url + ' ' + types.map(type => Number(opt.includes(type))).join(''))
+            .join('\n')
+        ytQuality.value = state.ytQuality
+    } else {
+        updateSwitchBoard()
     }
 })
 
