@@ -6,6 +6,13 @@ let customOpt = document.getElementById('preferences')
 let configText = document.getElementById('config')
 let ytQuality = document.getElementById('yt-quality')
 let switchCheck = document.getElementById('switch-data')
+// PAGE OPTS
+let checkBoard = [
+    document.getElementById('image'),
+    document.getElementById('script'),
+    document.getElementById('font'),
+    document.getElementById('media'),
+]
 
 let currentTabUrl
 // state of the config for the page when the popup was opened
@@ -23,8 +30,15 @@ switchCheck.addEventListener('click', () => {
     }
 })
 
+function updateSwitchBoard() {
+    let pageOpt = config[currentTabUrl] || config.default  // to be checked later by details.initiator
+    for (let widget of checkBoard) {
+        widget.checked = pageOpt.includes(widget.id)
+    }
+}
+
 document.getElementById('settings').addEventListener('change', () => {
-    if (event.target.checked) {  // show settings updated
+    if (event.target.checked) {  // show settings, updated
         switchCheck.checked = state.saving
         configText.value = Object.entries(config)
             .map(([url, opt]) => url + ' ' + types.map(type => Number(opt.includes(type))).join(''))
@@ -34,21 +48,6 @@ document.getElementById('settings').addEventListener('change', () => {
         updateSwitchBoard()
     }
 })
-
-// PAGE OPTS
-let checkBoard = [
-    document.getElementById('image'),
-    document.getElementById('script'),
-    document.getElementById('font'),
-    document.getElementById('media'),
-]
-
-function updateSwitchBoard() {
-    let pageOpt = config[currentTabUrl] || config.default  // to be checked later by details.initiator
-    for (let widget of checkBoard) {
-        widget.checked = pageOpt.includes(widget.id)
-    }
-}
 
 chrome.tabs.query({active: true}, tabs => {
     let url = new URL(tabs[0].url)
@@ -93,7 +92,10 @@ document.getElementById('save').addEventListener('click', event => {
 
 // save button on custom config tab
 document.getElementById('save-config').addEventListener('click', event => {
-    let toRemove = Object.fromEntries(Object.keys(config).map(url => [url, 1]))
+    let toRemove = {}
+    for (let url of Object.keys(config)) {
+        toRemove[url] = 1
+    }
     delete toRemove.default
     let newText = ''
     for (let line of configText.value.split('\n')) {
