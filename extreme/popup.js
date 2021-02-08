@@ -1,4 +1,4 @@
-let {state, types, config, turn} = chrome.extension.getBackgroundPage()
+let {tempo, state, types, config, turn} = chrome.extension.getBackgroundPage()
 
 // TABS FOR OPTIONS
 let pageOpt = document.getElementById('pageOpt')
@@ -66,20 +66,13 @@ chrome.tabs.query({active: true}, tabs => {
 
 document.getElementById('apply').addEventListener('click', () => {
     // temporarily set different options
-    let block = types.filter((_, i) => checkBoard[i].checked)
-    if (block.length == pageOptAtPopup.length && block.every((val, i) => val == pageOptAtPopup[i]))
+    let allow = types.filter((_, i) => checkBoard[i].checked)
+    if (allow.length == pageOptAtPopup.length && allow.every((val, i) => val == pageOptAtPopup[i]))
         return window.close()  // no change
-    state.tempo = {tabId: currentTabId, block}
-    let reloadCallback = (tabId, details) => {
-        if (state.tempo && state.tempo.tabId !== tabId || details.status !== 'complete') return
-        state.tempo = undefined
-        chrome.tabs.onUpdated.removeListener(reloadCallback)
-    }
-    chrome.tabs.onUpdated.addListener(reloadCallback)
-    chrome.tabs.reload(state.tempo.tabId)
+    tempo[currentTabUrl] = allow
+    chrome.tabs.reload(currentTabId)
     window.close()
 })
-
 
 document.getElementById('save').addEventListener('click', event => {
     let key = currentTabUrl  // to be checked later in property initiator of details

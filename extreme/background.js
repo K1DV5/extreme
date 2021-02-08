@@ -1,12 +1,11 @@
 types = ['image', 'script', 'font', 'media'] // what to block, in this order
 config = {default: []}  // as a global (in window) what to block
+tempo = {}  // config for session only, takes precedence over config
 state = {
     saving: true,
-    tempo: undefined,  // temporary config, set in popup.js
     allowNextUrl: undefined,  // can be like {url: ..., redirectTo: ...}, set in content.js
     ytQuality: 'tiny',
 }
-
 
 // block
 function block(details) {
@@ -18,12 +17,7 @@ function block(details) {
         state.allowNextUrl = undefined
         return
     }
-    let opt
-    if (state.tempo && details.tabId == state.tempo.tabId) {  // set by popup apply button
-        opt = state.tempo.block
-    } else {
-        opt = config[details.initiator] || config.default
-    }
+    let opt = tempo[details.initiator] || config[details.initiator] || config.default
     if (opt.includes(details.type)) return
     if (details.type == 'image') {
         return {redirectUrl: chrome.runtime.getURL('redir/empty.svg')}
