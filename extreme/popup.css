@@ -3,22 +3,26 @@
 }
 
 body {
-    width: 16em;
+    width: 22em;
+    padding: 0;
     /* padding: .5em .5em 0 .5em; */
 }
 
 header {
     display: flex;
     justify-content: space-between;
-    background-color: #0060B0;
+    align-items: center;
+    background-color: #06C;
     padding: .5em;
     font-weight: bold;
     font-size: 120%;
+    color: white;
 }
 
-#settings {
+header > label {
     font-size: 120%;
     cursor: pointer;
+    padding: .1em;
 }
 
 button {
@@ -50,9 +54,10 @@ textarea:focus {
 }
 
 code, pre {
-    color: cyan;
+    color: #06C;
     padding: 0 .5em 0 .5em;
     background: #0FF1;
+    font-size: 120%;
 }
 
 #by-site-help {
@@ -61,6 +66,22 @@ code, pre {
 
 select {
     appearance: none
+}
+
+#settings {
+    display: none
+}
+
+#preferences {
+    display: none;
+}
+
+#settings:checked ~ #pageOpt {
+    display: none
+}
+
+#settings:checked ~ #preferences {
+    display: block;
 }
 
 #pageOpt > div, #preferences > div {

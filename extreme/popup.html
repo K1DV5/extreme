@@ -9,9 +9,10 @@
     <body>
         <header>
             <div>Extreme</div>
-            <span id="settings">&#9881;</span>
+            <label for="settings">&#9881;</label>
         </header>
 
+        <input type="checkbox" id="settings">
         <div id="pageOpt">
             <div>
                 <code id="origin"></code>
@@ -42,7 +43,7 @@
             </div>
         </div>
 
-        <div id="preferences" style="display: none">
+        <div id="preferences">
             <div class="left-right">
                 <label for="switch-data">Status</label>
                 <input type="checkbox" id="switch-data" checked="true">
@@ -69,10 +70,9 @@
                 <div>
                     <textarea id="config" name="config"></textarea>
                     <div id="by-site-help">
-                        The format is:
                         <pre>&lt;url&gt; &lt;images&gt;&lt;scripts&gt;&lt;fonts&gt;&lt;media&gt;</pre>
                         <code>1</code> means do not block and <code>0</code> means block.
-                        <code>https://example.com 01100</code> blocks images and media on Example domain.
+                        E.g. <code>https://example.com 01100</code> blocks images and media on Example domain.
                     </div>
                 </div>
                 <button id="save-config">Save</button>
