@@ -121,3 +121,8 @@ document.getElementById('save-config').addEventListener('click', event => {
         state.ytQuality = quality
     })
 })
+
+// make wider for desktop
+if (window.screen.orientation && ['landscape-primary', 'portrait-secondary', undefined].includes(window.screen.orientation.type)) {
+    document.body.style.width = '22em'
+}
