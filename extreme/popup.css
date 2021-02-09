@@ -27,7 +27,7 @@ button {
     background: transparent;
     margin: .5em 0 .5em 0;
     border: 1px solid grey;
-    padding: .4em 1em;
+    padding: .5em 1em;
     border-radius: .3em;
     color: #0060B0;
     font-weight: bold;
@@ -39,10 +39,6 @@ button:focus {
 
 button:active {
     background: grey;
-}
-
-button:disabled {
-    color: grey;
 }
 
 textarea {

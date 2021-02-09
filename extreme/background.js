@@ -17,7 +17,7 @@ function block(details) {
         state.allowNextUrl = undefined
         return
     }
-    let opt = tempo[details.initiator] || config[details.initiator] || config.default
+    let opt = tempo[details.tabId + details.initiator] || config[details.initiator] || config.default
     if (opt.includes(details.type)) return
     if (details.type == 'image') {
         return imagePlaceholderOpt

@@ -57,8 +57,6 @@ chrome.tabs.query({active: true}, tabs => {
         pageOptAtPopup = config[currentTabUrl] || config.default
     } else {
         currentTabUrl = 'default'
-        // apply not needed
-        document.getElementById('apply').disabled = true
     }
     updateSwitchBoard()
     document.getElementById('origin').innerText = currentTabUrl
@@ -67,9 +65,9 @@ chrome.tabs.query({active: true}, tabs => {
 document.getElementById('apply').addEventListener('click', () => {
     // temporarily set different options
     let allow = types.filter((_, i) => checkBoard[i].checked)
-    if (allow.length == pageOptAtPopup.length && allow.every((val, i) => val == pageOptAtPopup[i]))
+    if (currentTabUrl == 'default' || allow.length == pageOptAtPopup.length && allow.every((val, i) => val == pageOptAtPopup[i]))
         return window.close()  // no change
-    tempo[currentTabUrl] = allow
+    tempo[currentTabId + currentTabUrl] = allow
     chrome.tabs.reload(currentTabId)
     window.close()
 })
