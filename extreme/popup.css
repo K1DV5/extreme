@@ -41,6 +41,10 @@ button:active {
     background: grey;
 }
 
+button:disabled {
+    color: grey;
+}
+
 textarea {
     border-color: gray;
     width: 100%;
