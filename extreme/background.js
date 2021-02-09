@@ -7,7 +7,7 @@ state = {
     ytQuality: 'tiny',
 }
 
-// block
+let imagePlaceholderOpt = {redirectUrl: chrome.runtime.getURL('redir/empty.svg')}
 function block(details) {
     if (state.allowNextUrl && details.url == state.allowNextUrl.url) {
         if (state.allowNextUrl.redirectTo) {
@@ -20,9 +20,7 @@ function block(details) {
     let opt = tempo[details.initiator] || config[details.initiator] || config.default
     if (opt.includes(details.type)) return
     if (details.type == 'image') {
-        return {redirectUrl: chrome.runtime.getURL('redir/empty.svg')}
-    } else if (details.type == 'script') {
-        return {redirectUrl: chrome.runtime.getURL('redir/empty.js')}
+        return imagePlaceholderOpt
     }
     return {cancel: true}
 }
