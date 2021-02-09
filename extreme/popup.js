@@ -55,6 +55,14 @@ chrome.tabs.query({active: true}, tabs => {
         currentTabId = tabs[0].id
         currentTabUrl = url.origin
         pageOptAtPopup = config[currentTabUrl] || config.default
+        // show loaded
+        let loaded = tempo[currentTabId + currentTabUrl] || pageOptAtPopup
+        let check = ' ' + String.fromCharCode(10003) // U+2713
+        for (let widget of checkBoard) {
+            if (loaded.includes(widget.id)) {
+                widget.labels[0].innerText += check
+            }
+        }
     } else {
         currentTabUrl = 'default'
     }
