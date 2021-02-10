@@ -4,9 +4,9 @@ Extreme is a data saver, designed to be used as a tool to reduce the data usage
 of Chrome using extreme maneuvers, like Opera mini but in different ways. It
 mainly uses content blocking (which may reduce the browsing experience), but
 also uses data saving request header, and some customizations for user
-experience. It is not an ad blocker (although it can block most). It is not a
-content blocker. But it works in a similar fashion, focusing on data saving
-trying not to reduce the normal user experience.
+experience. It is not an ad blocker or a content blocker. Although it works in
+a similar fashion, everything is seen and implemented from a data saving
+perspective.
 
 ## Content Blocking
 
@@ -16,11 +16,10 @@ The biggest offenders to data I've noticed are:
 - Media
 - Scripts
 - Fonts
-- Ads
 
 According to a report from
 [httparchive](https://httparchive.org/reports/page-weight), they account for
-more than 94% of the average page weight and thus are the focus of this
+75% to 94% of the average page weight and thus are the focus of this
 extension. By default, the extension blocks all of these things from any site
 with the URL scheme of `http://` or `https://`. But what is blocked can be
 customized on a host name basis (like `https://www.google.com`). A more
