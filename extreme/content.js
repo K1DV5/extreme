@@ -1,15 +1,19 @@
 // optionally show images on right click
 
-let cacheBuster = 'EXTREME'
+function changeUrl(url) {
+    let newUrl = new URL(url)
+    newUrl.search += (newUrl.search ? '&' : '?') + 'EXTREME=1'
+    return newUrl.toString()
+}
 
 document.addEventListener('contextmenu', () => {
     let target = event.target
     if (target.dataset.imageLoaded) return  // set below
     if (target.tagName === 'IMG') {
-        let src = target.currentSrc
-        chrome.runtime.sendMessage({allowNextUrl: {url: src + cacheBuster, redirectTo: src}}, () => {
-            target.srcset = ''
-            target.src = src + cacheBuster
+        let src = changeUrl(target.currentSrc)
+        chrome.runtime.sendMessage({allowNextUrl: src}, () => {
+            target.removeAttribute('srcset')
+            target.src = src
             target.dataset.imageLoaded = true  // prevent future click from re downloading
         })
         event.preventDefault()
@@ -17,12 +21,11 @@ document.addEventListener('contextmenu', () => {
         let bgImg = getComputedStyle(target).backgroundImage
         let urlIndex = bgImg.indexOf('url("')
         if (urlIndex == -1) return
-        if (urlIndex > 0) alert(bgImg)
         let urlBegin = urlIndex + 5
         let urlEnd = bgImg.indexOf('")', urlBegin)
-        let url = bgImg.slice(urlBegin, urlEnd)
-        chrome.runtime.sendMessage({allowNextUrl: {url: url + cacheBuster, redirectTo: url}}, () => {
-            target.style.backgroundImage = 'url("' + url + cacheBuster + '")'
+        let url = changeUrl(bgImg.slice(urlBegin, urlEnd))
+        chrome.runtime.sendMessage({allowNextUrl: url}, () => {
+            target.style.backgroundImage = 'url("' + url + '")'
             target.dataset.imageLoaded = true  // prevent future click from re downloading
         })
         event.preventDefault()

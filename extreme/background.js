@@ -9,11 +9,7 @@ state = {
 
 let imagePlaceholderOpt = {redirectUrl: chrome.runtime.getURL('redir/empty.svg')}
 function block(details) {
-    if (state.allowNextUrl && details.url == state.allowNextUrl.url) {
-        if (state.allowNextUrl.redirectTo) {
-            state.allowNextUrl = {url: state.allowNextUrl.redirectTo}
-            return {redirectUrl: state.allowNextUrl.url}
-        }
+    if (details.url == state.allowNextUrl) {
         state.allowNextUrl = undefined
         return
     }
