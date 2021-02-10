@@ -1,23 +1,18 @@
 let {tempo, state, types, config, turn} = chrome.extension.getBackgroundPage()
 
 // TABS FOR OPTIONS
-let pageOpt = document.getElementById('pageOpt')
-let customOpt = document.getElementById('preferences')
-let configText = document.getElementById('config')
-let ytQuality = document.getElementById('yt-quality')
-let switchCheck = document.getElementById('switch-data')
+const pageOpt = document.getElementById('pageOpt')
+const customOpt = document.getElementById('preferences')
+const configText = document.getElementById('config')
+const ytQuality = document.getElementById('yt-quality')
+const switchCheck = document.getElementById('switch-data')
 // PAGE OPTS
-let checkBoard = [
-    document.getElementById('image'),
-    document.getElementById('script'),
-    document.getElementById('font'),
-    document.getElementById('media'),
-]
-
+const checkBoard = types.map(t => document.getElementById(t))
+// the current tab info
 let currentTabUrl
+let currentTabId
 // state of the config for the page when the popup was opened
 let pageOptAtPopup
-let currentTabId
 
 // TURN ON/OFF
 switchCheck.addEventListener('click', () => {
@@ -54,12 +49,11 @@ chrome.tabs.query({active: true}, tabs => {
     if (['http:', 'https:'].includes(url.protocol)) {
         currentTabId = tabs[0].id
         currentTabUrl = url.origin
-        pageOptAtPopup = config[currentTabUrl] || config.default
+        pageOptAtPopup = tempo[currentTabId + currentTabUrl] || config[currentTabUrl] || config.default
         // show loaded
-        let loaded = tempo[currentTabId + currentTabUrl] || pageOptAtPopup
         let check = ' ' + String.fromCharCode(10003) // U+2713
         for (let widget of checkBoard) {
-            if (loaded.includes(widget.id)) {
+            if (pageOptAtPopup.includes(widget.id)) {
                 widget.labels[0].innerText += check
             }
         }
