@@ -122,6 +122,13 @@ document.getElementById('save-config').addEventListener('click', event => {
     })
 })
 
+// open project source
+document.getElementById('source').addEventListener('click', () => {
+    event.preventDefault()
+    chrome.tabs.create({url: event.target.href})
+    window.close()
+})
+
 // make wider for desktop
 if (window.screen.orientation && ['landscape-primary', 'portrait-secondary', undefined].includes(window.screen.orientation.type)) {
     document.body.style.width = '22em'
