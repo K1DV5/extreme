@@ -1,4 +1,4 @@
-types = ['image', 'script', 'font', 'media'] // what to block, in this order
+types = ['script', 'image', 'font', 'media'] // what to block, in this order
 config = {default: []}  // as a global (in window) what to block
 tempo = {}  // config for session only, takes precedence over config
 state = {

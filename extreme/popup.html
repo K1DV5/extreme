@@ -14,41 +14,42 @@
 
         <input type="checkbox" id="settings">
         <div id="pageOpt">
-            <div>
+            <div class="group">
                 <code id="origin"></code>
             </div>
-            <div>
-                <div>
-                    <input type="checkbox" id="script">
+            <div class="group">
+                <div class="left-right">
                     <label for="script">Scripts</label>
+                    <input type="checkbox" id="script">
                 </div>
 
-                <div>
-                    <input type="checkbox" id="image">
+                <div class="left-right">
                     <label for="image">Images</label>
+                    <input type="checkbox" id="image">
                 </div>
 
-                <div>
-                    <input type="checkbox" id="font">
+                <div class="left-right">
                     <label for="font">Fonts</label>
+                    <input type="checkbox" id="font">
                 </div>
 
-                <div>
-                    <input type="checkbox" id="media">
+                <div class="left-right">
                     <label for="media">Media</label>
+                    <input type="checkbox" id="media">
                 </div>
-
+            </div>
+            <div class="action">
                 <button id="apply">Apply</button>
                 <button id="save">Save</button>
             </div>
         </div>
 
         <div id="preferences">
-            <div class="left-right">
+            <div class="left-right group">
                 <label for="switch-data">Status</label>
                 <input type="checkbox" id="switch-data" checked="true">
             </div>
-            <div class="left-right">
+            <div class="left-right group">
                 <label for="yt-quality">YouTube quality</label>
                 <select id="yt-quality">
                     <option value="none">Not Set</option>
@@ -64,18 +65,20 @@
                     <option value="highres">8K</option>
                 </select>
             </div>
-            <div>
+            <div class="group">
                 <div>Options by site</div>
                 <br>
                 <div>
                     <textarea id="config" name="config"></textarea>
                     <div id="by-site-help">
-                        <pre>&lt;url&gt; &lt;images&gt;&lt;scripts&gt;&lt;fonts&gt;&lt;media&gt;</pre>
+                        <pre>&lt;url&gt; &lt;scripts&gt;&lt;images&gt;&lt;fonts&gt;&lt;media&gt;</pre>
                         <code>1</code> means do not block and <code>0</code> means block.
                         E.g. <code>https://example.com 01100</code> blocks images and media on Example domain.
                     </div>
                 </div>
-                <button id="save-config">Save</button>
+                <div class="action">
+                    <button id="save-config">Save</button>
+                </div>
             </div>
             <p>
                 Project source: <a href="https://github.com/K1DV5/extreme" id="source">https://github.com/K1DV5/extreme</a>

@@ -20,15 +20,14 @@ header {
 header > label {
     font-size: 120%;
     cursor: pointer;
-    padding: .1em;
+    padding: .1em .5em;
 }
 
 button {
     background: transparent;
-    margin: .5em 0 .5em 0;
+    margin: .5em .2em .5em .2em;
     border: 1px solid grey;
     padding: .5em 1em;
-    border-radius: .3em;
     color: #0060B0;
     font-weight: bold;
 }
@@ -39,6 +38,26 @@ button:focus {
 
 button:active {
     background: grey;
+}
+
+input[type=checkbox] {
+    height: 1em;
+    width: 3em;
+    margin-bottom: .8em;
+}
+
+input[type=checkbox]:after {
+    display: block;
+    content: "";
+    height: 1.5em;
+    width: 3em;
+    background: linear-gradient(to right, red 0%, red 50%, grey 50%, grey 100%);
+    position: relative;
+    top: 0;
+}
+
+input[type=checkbox]:checked:after {
+    background: linear-gradient(to right, grey 0%, grey 50%, #0F0 50%, #0F0 100%);
 }
 
 textarea {
@@ -82,15 +101,19 @@ select {
     display: block;
 }
 
-#pageOpt > div, #preferences > div {
+.group {
     margin-top: 1em;
     background-color: #8882;
     padding: .5em;
-    border-radius: .3em;
 }
 
 .left-right {
     display: flex;
     justify-content: space-between;
     align-items: center;
+}
+
+.action {
+    display: flex;
+    justify-content: flex-end;
 }
