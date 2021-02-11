@@ -24,7 +24,7 @@ header > label {
 }
 
 button {
-    background: transparent;
+    background: none;
     margin: .5em .2em .5em .2em;
     border: 1px solid grey;
     padding: .5em 1em;
@@ -82,7 +82,10 @@ code, pre {
 }
 
 select {
-    appearance: none
+    appearance: none;
+    border: none;
+    padding: .3em;
+    background-color: #6666;
 }
 
 #settings {
