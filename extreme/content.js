@@ -2,7 +2,10 @@
 
 function changeUrl(url) {
     let newUrl = new URL(url)
-    newUrl.search += (newUrl.search ? '&' : '?') + 'EXTREME=1'
+    // change only if the url is in one of these protocols
+    if (['http:', 'https:'].includes(newUrl.protocol)) {
+        newUrl.search += (newUrl.search ? '&' : '?') + 'EXTREME=1'
+    }
     return newUrl.toString()
 }
 
