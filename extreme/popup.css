@@ -17,7 +17,12 @@ header {
     color: white;
 }
 
-header > label {
+header > div:last-child {
+    display: flex;
+    align-items: center;
+}
+
+header label {
     font-size: 120%;
     cursor: pointer;
     padding: .1em .5em;
@@ -48,9 +53,10 @@ input[type=checkbox] {
 input[type=checkbox]:after {
     display: block;
     content: "";
-    height: 1.5em;
-    width: 3em;
+    height: 1em;
+    width: 2em;
     background: linear-gradient(to right, red 50%, grey 50%);
+    border: .25em solid grey
 }
 
 input[type=checkbox]:checked:after {
