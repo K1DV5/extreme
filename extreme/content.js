@@ -16,13 +16,8 @@ document.addEventListener('contextmenu', () => {
         let src = changeUrl(target.currentSrc)
         chrome.runtime.sendMessage({allowNextUrl: src}, () => {
             target.removeAttribute('srcset')
-            target.src = chrome.runtime.getURL('redir/loading.svg')
-            let tmp = document.createElement('img')
-            tmp.onload = () => {
-                target.src = src
-                target.dataset.imageLoaded = true  // prevent future click from re downloading
-            }
-            tmp.src = src
+            target.src = src
+            target.dataset.imageLoaded = true  // prevent future click from re downloading
         })
         event.preventDefault()
     } else {
