@@ -9,10 +9,6 @@ state = {
 
 let imagePlaceholderOpt = {redirectUrl: chrome.runtime.getURL('redir/empty.svg')}
 function block(details) {
-    if (details.url == state.allowNextUrl) {
-        state.allowNextUrl = undefined
-        return
-    }
     let opt = tempo[details.tabId + details.initiator] || config[details.initiator] || config.default
     if (opt.includes(details.type)) return
     if (details.type == 'image') {
@@ -46,10 +42,42 @@ chrome.storage.local.get(['config', 'ytQuality'], result => {
     turn(true)  // start blocking
 })
 
+function allowNextUrl(url) {
+    let allowUrl = url
+    let requestId
+    let tempBlock = details => {
+        if (details.url != allowUrl) {
+            return {cancel: true}
+        }
+        requestId = details.requestId
+    }
+    chrome.webRequest.onBeforeRequest.addListener(tempBlock, {urls: [url], types}, ['blocking'])
+    chrome.webRequest.onBeforeRequest.removeListener(block)
+    let updateAllow = details => {
+        if (details.requestId == requestId) {
+            allowUrl = details.redirectUrl
+        }
+    }
+    chrome.webRequest.onBeforeRedirect.addListener(updateAllow, {urls: ['http://*/*', 'https://*/*'], types: ['image']})
+    let finish = details => {
+        if (details.requestId != requestId) {
+            return
+        }
+        chrome.webRequest.onBeforeRequest.removeListener(tempBlock)
+        chrome.webRequest.onBeforeRedirect.removeListener(updateAllow)
+        chrome.webRequest.onCompleted.removeListener(finish)
+        chrome.webRequest.onErrorOccurred.removeListener(finish)
+        chrome.webRequest.onBeforeRequest.addListener(block,
+            {urls: ['http://*/*', 'https://*/*'], types}, ['blocking'])
+    }
+    chrome.webRequest.onCompleted.addListener(finish, {urls: ['http://*/*', 'https://*/*'], types: ['image']})
+    chrome.webRequest.onErrorOccurred.addListener(finish, {urls: ['http://*/*', 'https://*/*'], types: ['image']})
+}
+
 // MESSAGING WITH PAGE CONTEXT SCRIPTS
 chrome.runtime.onMessage.addListener((message, _, sendResponse) => {
     if (message.allowNextUrl) { // optionally show images on contextmenu
-        state.allowNextUrl = message.allowNextUrl
+        allowNextUrl(message.allowNextUrl)
         sendResponse() // to indicate that what needs to be done here is over
     } else if (message == 'ytQuality') {  // get the desired default youtube playback quality
         sendResponse(state.ytQuality)
