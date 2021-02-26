@@ -19,6 +19,11 @@
             "matches": ["http://*/*", "https://*/*"],
             "js": ["content.js"],
             "all_frames": true
+        },
+        {
+            "matches": ["http://*.youtube.com/*", "https://*.youtube.com/*"],
+            "js": ["yt.js"],
+            "all_frames": true
         }
     ],
     "browser_action": {
