@@ -9,12 +9,24 @@ function changeUrl(url) {
     return newUrl.toString()
 }
 
+let loading = chrome.runtime.getURL('redir/empty.svg')
+
 document.addEventListener('contextmenu', () => {
     let target = event.target
     if (target.dataset.imageLoaded) return  // set below
     if (target.tagName === 'IMG') {
         let src = changeUrl(target.currentSrc)
         chrome.runtime.sendMessage({allowNextUrl: src}, () => {
+            let pholder = target.cloneNode(true)
+            pholder.src = loading
+            let lastDisp = getComputedStyle(target).display
+            target.style.display = 'none'
+            target.insertAdjacentElement('beforebegin', pholder)
+            target.addEventListener('load', function onLoad() {
+                target.display = lastDisp
+                pholder.remove()
+                target.removeEventListener(onLoad)
+            })
             target.removeAttribute('srcset')
             target.src = src
             target.dataset.imageLoaded = true  // prevent future click from re downloading
