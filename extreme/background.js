@@ -3,7 +3,6 @@ config = {default: []}  // as a global (in window) what to block
 tempo = {}  // config for session only, takes precedence over config
 state = {
     saving: true,
-    allowNextUrl: undefined,  // can be like {url: ..., redirectTo: ...}, set in content.js
     ytQuality: 'tiny',
 }
 
@@ -21,12 +20,13 @@ function saveDataHeader(details) {  // add Save-Data: on header
     return {requestHeaders: [...details.requestHeaders, {name: 'Save-Data', value: 'on'}]}
 }
 
+const listenerOpts = {urls: ['http://*/*', 'https://*/*'], types}
+
 function turn(on) {
     if (on) {
-        chrome.webRequest.onBeforeRequest.addListener(block,
-            {urls: ['http://*/*', 'https://*/*'], types}, ['blocking'])
+        chrome.webRequest.onBeforeRequest.addListener(block, listenerOpts, ['blocking'])
         chrome.webRequest.onBeforeSendHeaders.addListener(saveDataHeader,
-            {urls: ['http://*/*', 'https://*/*']}, ['blocking', 'requestHeaders'])
+            listenerOpts, ['blocking', 'requestHeaders'])
         state.saving = true
     } else {
         chrome.webRequest.onBeforeRequest.removeListener(block)
@@ -55,7 +55,7 @@ function allowNextUrl(url) {
         // block any other request
         return {cancel: true}
     }
-    chrome.webRequest.onBeforeRequest.addListener(tempBlock, {urls: [url], types}, ['blocking'])
+    chrome.webRequest.onBeforeRequest.addListener(tempBlock, listenerOpts, ['blocking'])
     chrome.webRequest.onBeforeRequest.removeListener(block)
     let finish = details => {
         if (details.requestId != requestId) {
@@ -64,11 +64,10 @@ function allowNextUrl(url) {
         chrome.webRequest.onBeforeRequest.removeListener(tempBlock)
         chrome.webRequest.onCompleted.removeListener(finish)
         chrome.webRequest.onErrorOccurred.removeListener(finish)
-        chrome.webRequest.onBeforeRequest.addListener(block,
-            {urls: ['http://*/*', 'https://*/*'], types}, ['blocking'])
+        chrome.webRequest.onBeforeRequest.addListener(block, listenerOpts, ['blocking'])
     }
-    chrome.webRequest.onCompleted.addListener(finish, {urls: ['http://*/*', 'https://*/*'], types: ['image']})
-    chrome.webRequest.onErrorOccurred.addListener(finish, {urls: ['http://*/*', 'https://*/*'], types: ['image']})
+    chrome.webRequest.onCompleted.addListener(finish, listenerOpts)
+    chrome.webRequest.onErrorOccurred.addListener(finish, listenerOpts)
 }
 
 // MESSAGING WITH PAGE CONTEXT SCRIPTS
