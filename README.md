@@ -60,7 +60,7 @@ and it doesn't interfere with subsequent right clicks.
 If the page relies on some part (example: JS scripts) and you want to load the
 JS for just one time, you can click on the icon of the extension on the
 extensions toolbar. This brings some options and you can check what you want
-downloaded and click 'Apply'. This is for a single reload only.
+downloaded and click 'Apply'. This is only for the lifetime of the tab.
 
 ### Save customizations
 
