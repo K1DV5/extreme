@@ -42,18 +42,19 @@ chrome.storage.local.get(['config', 'ytQuality'], result => {
     turn(true)  // start blocking
 })
 
+
 function allowNextUrl(url) {
     let requestId
     let tempBlock = details => {
         if (details.requestId == requestId) {
-            return
+            return  // allow
         }
         if (details.url == url) {
             requestId = details.requestId
             return
         }
-        // block any other request
-        return {cancel: true}
+        // as normal for other requests
+        return block(details)
     }
     chrome.webRequest.onBeforeRequest.addListener(tempBlock, listenerOpts, ['blocking'])
     chrome.webRequest.onBeforeRequest.removeListener(block)
@@ -64,8 +65,15 @@ function allowNextUrl(url) {
         chrome.webRequest.onBeforeRequest.removeListener(tempBlock)
         chrome.webRequest.onCompleted.removeListener(finish)
         chrome.webRequest.onErrorOccurred.removeListener(finish)
+        chrome.webRequest.onBeforeRedirect.removeListener(handleRedirect)
         chrome.webRequest.onBeforeRequest.addListener(block, listenerOpts, ['blocking'])
     }
+    let handleRedirect = details => {  // to handle redirects to data: urls
+        if (details.requestId == requestId && new URL(details.redirectUrl).protocol == 'data:') {
+            finish(details)
+        }
+    }
+    chrome.webRequest.onBeforeRedirect.addListener(handleRedirect)
     chrome.webRequest.onCompleted.addListener(finish, listenerOpts)
     chrome.webRequest.onErrorOccurred.addListener(finish, listenerOpts)
 }
