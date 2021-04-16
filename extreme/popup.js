@@ -61,6 +61,7 @@ chrome.tabs.query({active: true}, tabs => {
         currentTabUrl = 'default'
     }
     updateSwitchBoard()
+    switchCheck.checked = state.saving
     document.getElementById('origin').innerText = currentTabUrl
 })
 
