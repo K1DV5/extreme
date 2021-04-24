@@ -58,24 +58,24 @@ function allowNextUrl(url) {
     }
     chrome.webRequest.onBeforeRequest.addListener(tempBlock, listenerOpts, ['blocking'])
     chrome.webRequest.onBeforeRequest.removeListener(block)
-    let finish = details => {
+    let cleanup = details => {
         if (details.requestId != requestId) {
             return
         }
         chrome.webRequest.onBeforeRequest.removeListener(tempBlock)
-        chrome.webRequest.onCompleted.removeListener(finish)
-        chrome.webRequest.onErrorOccurred.removeListener(finish)
+        chrome.webRequest.onCompleted.removeListener(cleanup)
+        chrome.webRequest.onErrorOccurred.removeListener(cleanup)
         chrome.webRequest.onBeforeRedirect.removeListener(handleRedirect)
         chrome.webRequest.onBeforeRequest.addListener(block, listenerOpts, ['blocking'])
     }
     let handleRedirect = details => {  // to handle redirects to data: urls
         if (details.requestId == requestId && new URL(details.redirectUrl).protocol == 'data:') {
-            finish(details)
+            cleanup(details)
         }
     }
-    chrome.webRequest.onBeforeRedirect.addListener(handleRedirect)
-    chrome.webRequest.onCompleted.addListener(finish, listenerOpts)
-    chrome.webRequest.onErrorOccurred.addListener(finish, listenerOpts)
+    chrome.webRequest.onBeforeRedirect.addListener(handleRedirect, listenerOpts)
+    chrome.webRequest.onCompleted.addListener(cleanup, listenerOpts)
+    chrome.webRequest.onErrorOccurred.addListener(cleanup, listenerOpts)
 }
 
 // MESSAGING WITH PAGE CONTEXT SCRIPTS
