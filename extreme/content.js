@@ -5,15 +5,16 @@ function changeUrl(url) {
     // change only if the url is in one of these protocols
     if (['http:', 'https:'].includes(newUrl.protocol)) {
         newUrl.search += (newUrl.search ? '&' : '?') + 'EXTREME=1'
+        return newUrl.toString()
     }
-    return newUrl.toString()
 }
 
-document.addEventListener('contextmenu', () => {
+document.addEventListener('contextmenu', event => {
     let target = event.target
     if (target.dataset.imageLoaded) return  // set below
     if (target.tagName === 'IMG') {
         let src = changeUrl(target.currentSrc)
+        if (src == undefined) return  // maybe it's data:
         target.src = ''
         chrome.runtime.sendMessage({allowNextUrl: src}, () => {
             target.removeAttribute('srcset')
@@ -28,6 +29,7 @@ document.addEventListener('contextmenu', () => {
         let urlBegin = urlIndex + 5
         let urlEnd = bgImg.indexOf('")', urlBegin)
         let url = changeUrl(bgImg.slice(urlBegin, urlEnd))
+        if (url == undefined) return  // maybe it's data:
         target.style.backgroundImage = ''
         chrome.runtime.sendMessage({allowNextUrl: url}, () => {
             target.style.backgroundImage = 'url("' + url + '")'
