@@ -24,6 +24,12 @@ header > div:last-child {
     align-items: center;
 }
 
+header > img {
+    width: 2em;
+    margin: .4em;
+    filter: brightness(0) invert(1);
+}
+
 header label {
     font-size: 120%;
     cursor: pointer;
