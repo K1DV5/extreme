@@ -6,7 +6,6 @@
         "storage",
         "webRequest",
         "webRequestBlocking",
-        "contextMenus",
         "tabs",
         "http://*/*",
         "https://*/*"

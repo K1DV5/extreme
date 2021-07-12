@@ -15,7 +15,7 @@ let currentTabId
 let pageOptAtPopup
 
 // TURN ON/OFF
-switchCheck.addEventListener('click', () => {
+switchCheck.addEventListener('click', event => {
     if (state.saving) {
         turn(false)
         event.target.checked = false
@@ -32,7 +32,7 @@ function updateSwitchBoard() {
     }
 }
 
-document.getElementById('settings').addEventListener('change', () => {
+document.getElementById('settings').addEventListener('change', event => {
     if (event.target.checked) {  // show settings, updated
         switchCheck.checked = state.saving
         configText.value = Object.entries(config)
@@ -124,7 +124,7 @@ document.getElementById('save-config').addEventListener('click', event => {
 })
 
 // open project source
-document.getElementById('source').addEventListener('click', () => {
+document.getElementById('source').addEventListener('click', event => {
     event.preventDefault()
     chrome.tabs.create({url: event.target.href})
     window.close()
