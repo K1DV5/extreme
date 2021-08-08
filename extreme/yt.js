@@ -4,7 +4,6 @@
 const ytQualityKyeName = 'ExtremeYoutubeQuality'
 
 chrome.runtime.onMessage.addListener((message, _, sendResponse) => {
-    console.log(message, _, sendResponse)
     if (message === 'ytQuality') {
         let quality = localStorage.getItem(ytQualityKyeName)
         if (!quality) {
@@ -18,9 +17,8 @@ chrome.runtime.onMessage.addListener((message, _, sendResponse) => {
     }
 })
 
-() => {
+function extremeYoutubeQuality() {
     let quality = localStorage.getItem(ytQualityKyeName) || 'auto'
-    console.log(quality)
     if (quality == 'auto') return  // chosen by youtube
     let script = document.createElement('script')
     script.innerHTML = `
@@ -50,4 +48,6 @@ chrome.runtime.onMessage.addListener((message, _, sendResponse) => {
         })
         `
     document.body.appendChild(script)
-}()
+}
+
+extremeYoutubeQuality()

@@ -56,7 +56,7 @@ async function init() {
         chrome.tabs.sendMessage(currentTabId, 'ytQuality', undefined, quality => {
             if (chrome.runtime.lastError) return
             let ytQualitySel = document.getElementById('yt-quality')
-            ytQualitySel.getElementById('yt').style.display = ''
+            document.getElementById('yt').style.display = ''
             ytQualitySel.value = quality
             ytQualitySel.addEventListener('change', () => {
                 chrome.tabs.sendMessage(currentTabId, {type: 'ytQuality', value: ytQualitySel.value}, undefined, ytQuality => {
