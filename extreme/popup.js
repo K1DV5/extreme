@@ -1,134 +1,129 @@
-let {tempo, state, types, config, turn} = chrome.extension.getBackgroundPage()
-
-// TABS FOR OPTIONS
-const pageOpt = document.getElementById('pageOpt')
-const customOpt = document.getElementById('preferences')
-const configText = document.getElementById('config')
-const ytQuality = document.getElementById('yt-quality')
 const switchCheck = document.getElementById('switch-data')
-// PAGE OPTS
-const checkBoard = types.map(t => document.getElementById(t))
 // the current tab info
-let currentTabUrl
+let currentTabDomain
 let currentTabId
+// PAGE OPTS
+const checkBoard = document.querySelectorAll('#pageOpt input[type=checkbox]')
 // state of the config for the page when the popup was opened
-let pageOptAtPopup
+let config = {default: ''}
+let sessionConf = {}
+// config textarea
+const configText = document.getElementById('config')
 
 // TURN ON/OFF
-switchCheck.addEventListener('click', event => {
-    if (state.saving) {
-        turn(false)
-        event.target.checked = false
-    } else {
-        turn(true)
-        event.target.checked = true
-    }
+switchCheck.addEventListener('change', event => {
+    let message = switchCheck.checked ? 'switchOn' : 'switchOff'
+    chrome.runtime.sendMessage(message, state => switchCheck.checked = state)
 })
 
 function updateSwitchBoard() {
-    let pageOpt = config[currentTabUrl] || config.default  // to be checked later by details.initiator
+    let pageOpt = config[currentTabDomain] || config.default
     for (let widget of checkBoard) {
-        widget.checked = pageOpt.includes(widget.id)
+        widget.checked = pageOpt.includes(widget.id[0])
+    }
+}
+
+async function init() {
+    chrome.runtime.sendMessage('state', state => {
+        switchCheck.checked = state
+    })
+    let currentTab = (await chrome.tabs.query({active: true}))[0]
+    if (currentTab?.url) {  // don't need tabs permission, so don't need to check protocol
+        let url = new URL(currentTab.url)
+        currentTabId = currentTab.id
+        currentTabDomain = url.host
+    } else {
+        currentTabDomain = 'default'
+    }
+    chrome.runtime.sendMessage('config', conf => {
+        config = conf.dynamic
+        sessionConf = conf.session
+        updateSwitchBoard()
+        // show loaded outside of config
+        let check = ' ' + String.fromCharCode(10003) // U+2713
+        let pageOpt = config[currentTabDomain] || config.default
+        let pageSessionOpt = sessionConf[currentTabDomain] || ''
+        if (pageSessionOpt.length) {
+            for (let widget of checkBoard) {
+                if (pageSessionOpt.includes(widget.id[0])) {
+                    widget.labels[0].innerText += check
+                }
+            }
+        }
+    })
+    document.getElementById('domain').innerText = currentTabDomain
+    if (currentTabDomain.endsWith('youtube.com')) {
+        chrome.tabs.sendMessage(currentTabId, 'ytQuality', undefined, quality => {
+            if (chrome.runtime.lastError) return
+            let ytQualitySel = document.getElementById('yt-quality')
+            ytQualitySel.getElementById('yt').style.display = ''
+            ytQualitySel.value = quality
+            ytQualitySel.addEventListener('change', () => {
+                chrome.tabs.sendMessage(currentTabId, {type: 'ytQuality', value: ytQualitySel.value}, undefined, ytQuality => {
+                    ytQualitySel.value = ytQuality
+                })
+            })
+        })
     }
 }
 
 document.getElementById('settings').addEventListener('change', event => {
     if (event.target.checked) {  // show settings, updated
-        switchCheck.checked = state.saving
-        configText.value = Object.entries(config)
-            .map(([url, opt]) => url + ' ' + types.map(type => Number(opt.includes(type))).join(''))
-            .join('\n')
-        ytQuality.value = state.ytQuality
+        configText.value = Object.entries(config).map(pair => pair.join(' ')).join('\n')
     } else {
         updateSwitchBoard()
     }
-})
-
-chrome.tabs.query({active: true}, tabs => {
-    let url = new URL(tabs[0].url)
-    if (['http:', 'https:'].includes(url.protocol)) {
-        currentTabId = tabs[0].id
-        currentTabUrl = url.origin
-        pageOptAtPopup = tempo[currentTabId + currentTabUrl] || config[currentTabUrl] || config.default
-        // show loaded
-        let check = ' ' + String.fromCharCode(10003) // U+2713
-        for (let widget of checkBoard) {
-            if (pageOptAtPopup.includes(widget.id)) {
-                widget.labels[0].innerText += check
-            }
-        }
-    } else {
-        currentTabUrl = 'default'
-    }
-    updateSwitchBoard()
-    switchCheck.checked = state.saving
-    document.getElementById('origin').innerText = currentTabUrl
 })
 
 document.getElementById('apply').addEventListener('click', () => {
     // temporarily set different options
-    let allow = types.filter((_, i) => checkBoard[i].checked)
-    if (currentTabUrl == 'default' || allow.length == pageOptAtPopup.length && allow.every((val, i) => val == pageOptAtPopup[i]))
+    let allow = Array.from(checkBoard).filter(c => c.checked).map(c => c.id[0]).join('')
+    let pageOpt = sessionConf[currentTabDomain] || config[currentTabDomain]
+    if (currentTabDomain == 'default' || allow == pageOpt || !switchCheck.checked)
         return window.close()  // no change
-    tempo[currentTabId + currentTabUrl] = allow
-    chrome.tabs.reload(currentTabId)
-    window.close()
-})
-
-document.getElementById('save').addEventListener('click', event => {
-    let key = currentTabUrl  // to be checked later in property initiator of details
-    config[key] = types.filter((_, i) => checkBoard[i].checked)
-    chrome.storage.local.set({config})
-    let prevText = event.target.innerText
-    event.target.innerText = 'Saved'
-    setTimeout(() => event.target.innerText = prevText, 1000)
-})
-
-// save button on custom config tab
-document.getElementById('save-config').addEventListener('click', event => {
-    let toRemove = {}
-    for (let url of Object.keys(config)) {
-        toRemove[url] = 1
-    }
-    delete toRemove.default
-    let newText = ''
-    for (let line of configText.value.split('\n')) {
-        if (!line.trim() || line[0] == '#') continue
-        let [url, opt] = line.split(' ')
-        let origin
-        if (url == 'default')
-            origin = url
-        else try {
-            origin = new URL(url).origin
-        } catch {continue}
-        if (isNaN(opt)) {
-            toRemove[origin] = 1
-            continue
-        }
-        config[origin] = types.filter((_, i) => opt[i] == 1)
-        delete toRemove[origin]
-        newText += line + '\n'
-    }
-    for (let url of Object.keys(toRemove)) {
-        delete config[url]
-    }
-    let quality = ytQuality.value
-    chrome.storage.local.set({config, ytQuality: quality}, () => {
-        configText.value = newText
-        let prevText = event.target.innerText
-        event.target.innerText = 'Saved'
-        setTimeout(() => event.target.innerText = prevText, 1000)
-        updateSwitchBoard()
-        state.ytQuality = quality
+    chrome.runtime.sendMessage({type: 'setSessConf', domain: currentTabDomain, tabId: currentTabId, opts: allow}, () => {
+        chrome.tabs.reload(currentTabId)
+        window.close()
     })
 })
 
-// open project source
-document.getElementById('source').addEventListener('click', event => {
-    event.preventDefault()
-    chrome.tabs.create({url: event.target.href})
-    window.close()
+document.getElementById('save').addEventListener('click', event => {
+    let key = currentTabDomain  // to be checked later in property initiator of details
+    let newConf = Array.from(checkBoard).filter(c => c.checked).map(c => c.id[0]).join('')
+    if (config[key] == newConf) {
+        return
+    }
+    config[key] = newConf
+    chrome.runtime.sendMessage({type: 'setConfig', config: {...config, [currentTabDomain]: newConf}}, () => {
+        let prevText = event.target.innerText
+        event.target.innerText = 'Saved'
+        setTimeout(() => event.target.innerText = prevText, 1000)
+    })
 })
+
+document.getElementById('save-config').addEventListener('click', event => {
+    let newConfig = {default: ''}
+    for (let line of configText.value.split('\n')) {
+        line = line.trim().replace(/\s+/g, ' ')
+        if (!line || line[0] == '#') continue
+        let [domain, opt] = line.split(' ')
+        let url
+        try {
+            url = new URL('https://' + domain)
+        } catch {continue}
+        if (url.host !== domain || !opt) continue
+        newConfig[domain] = opt
+    }
+    chrome.runtime.sendMessage({type: 'setConfig', config: newConfig}, () => {
+        config = newConfig
+        configText.value = Object.entries(config).map(pair => pair.join(' ')).join('\n')
+        let prevText = event.target.innerText
+        event.target.innerText = 'Saved'
+        setTimeout(() => event.target.innerText = prevText, 1000)
+    })
+})
+
+init()
 
 // make wider for desktop
 if (window.screen.orientation && ['landscape-primary', 'portrait-secondary', undefined].includes(window.screen.orientation.type)) {

@@ -1,17 +1,16 @@
   {
     "name": "Extreme",
-    "version": "1.0",
+    "version": "2.0.0",
     "description": "Save data by blocking parts of sites",
     "permissions": [
-        "storage",
-        "webRequest",
-        "webRequestBlocking",
-        "tabs",
+        "declarativeNetRequest"
+    ],
+    "host_permissions": [
         "http://*/*",
         "https://*/*"
     ],
     "background": {
-      "scripts": ["background.js"]
+      "service_worker": "background.js"
     },
     "content_scripts": [
         {
@@ -25,8 +24,9 @@
             "all_frames": true
         }
     ],
-    "browser_action": {
+    "action": {
       "default_popup": "popup.html",
+      "default_title": "Extreme",
       "default_icon": {
         "16": "images/icon16.png",
         "32": "images/icon32.png",
@@ -40,6 +40,9 @@
       "48": "images/icon48.png",
       "128": "images/icon128.png"
     },
-    "web_accessible_resources": ["redir/*"],
-    "manifest_version": 2
+    "web_accessible_resources": [{
+        "resources": ["redir/empty.svg"],
+        "matches": ["http://*/*", "https://*/*"]
+    }],
+    "manifest_version": 3
   }

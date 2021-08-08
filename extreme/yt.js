@@ -1,7 +1,27 @@
 // Set youtube playback quality
 // both youtube video page and embedded
-chrome.runtime.sendMessage('ytQuality', quality => {
-    if (quality == 'none') return  // chosen by youtube
+
+const ytQualityKyeName = 'ExtremeYoutubeQuality'
+
+chrome.runtime.onMessage.addListener((message, _, sendResponse) => {
+    console.log(message, _, sendResponse)
+    if (message === 'ytQuality') {
+        let quality = localStorage.getItem(ytQualityKyeName)
+        if (!quality) {
+            quality = 'auto'
+            localStorage.setItem(ytQualityKyeName, quality)
+        }
+        sendResponse(quality)
+    } else if (message.type == 'ytQuality') {
+        localStorage.setItem(ytQualityKyeName, message.value)
+        sendResponse(message.value)
+    }
+})
+
+() => {
+    let quality = localStorage.getItem(ytQualityKyeName) || 'auto'
+    console.log(quality)
+    if (quality == 'auto') return  // chosen by youtube
     let script = document.createElement('script')
     script.innerHTML = `
         function restrictQuality() {
@@ -30,4 +50,4 @@ chrome.runtime.sendMessage('ytQuality', quality => {
         })
         `
     document.body.appendChild(script)
-})
+}()

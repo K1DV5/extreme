@@ -12,7 +12,7 @@
             <img src="images/icon128.png" alt="icon" id="icon">
             <div>Extreme</div>
             <div>
-                <input type="checkbox" id="switch-data" checked="true">
+                <input type="checkbox" id="switch-data">
                 <label for="settings">&#9881;</label>
             </div>
         </header>
@@ -20,7 +20,23 @@
         <input type="checkbox" id="settings">
         <div id="pageOpt">
             <div class="group">
-                <code id="origin"></code>
+                <code id="domain"></code>
+            </div>
+            <div class="left-right group" id="yt" style="display: none">
+                <label for="yt-quality">YouTube quality</label>
+                <select id="yt-quality">
+                    <option value="auto">Auto</option>
+                    <option value="tiny">144p</option>
+                    <option value="small">240p</option>
+                    <option value="medium">360p</option>
+                    <option value="large">480p</option>
+                    <option value="hd720">720p</option>
+                    <option value="hd1080">1080p</option>
+                    <option value="hd1440">1440p</option>
+                    <option value="hd2160">2160p 4K</option>
+                    <option value="hd2880">2880p 5K</option>
+                    <option value="highres">8K</option>
+                </select>
             </div>
             <div class="group">
                 <div class="left-right">
@@ -50,26 +66,10 @@
         </div>
 
         <div id="preferences">
-            <div class="left-right group">
-                <label for="yt-quality">YouTube quality</label>
-                <select id="yt-quality">
-                    <option value="none">Not Set</option>
-                    <option value="tiny">144p</option>
-                    <option value="small">240p</option>
-                    <option value="medium">360p</option>
-                    <option value="large">480p</option>
-                    <option value="hd720">720p</option>
-                    <option value="hd1080">1080p</option>
-                    <option value="hd1440">1440p</option>
-                    <option value="hd2160">2160p 4K</option>
-                    <option value="hd2880">2880p 5K</option>
-                    <option value="highres">8K</option>
-                </select>
-            </div>
             <div class="group">
                 <div>Options by site</div>
                 <div>
-                    <textarea id="config" name="config"></textarea>
+                    <textarea id="config" name="config" spellcheck="false"></textarea>
                     <div id="by-site-help">
                         <pre>&lt;url&gt; &lt;scripts&gt;&lt;images&gt;&lt;fonts&gt;&lt;media&gt;</pre>
                         <code>1</code> means do not block and <code>0</code> means block.
@@ -81,7 +81,7 @@
                 <button id="save-config">Save</button>
             </div>
             <p>
-                Project source: <a href="https://github.com/K1DV5/extreme" id="source">https://github.com/K1DV5/extreme</a>
+                Project source: <a href="https://github.com/K1DV5/extreme" target="_blank">https://github.com/K1DV5/extreme</a>
             </p>
         </div>
 
