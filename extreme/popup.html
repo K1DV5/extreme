@@ -67,13 +67,13 @@
 
         <div id="preferences">
             <div class="group">
-                <div>Options by site</div>
+                <div>Whitelist</div>
                 <div>
                     <textarea id="config" name="config" spellcheck="false"></textarea>
                     <div id="by-site-help">
-                        <pre>&lt;url&gt; &lt;scripts&gt;&lt;images&gt;&lt;fonts&gt;&lt;media&gt;</pre>
-                        <code>1</code> means do not block and <code>0</code> means block.
-                        E.g. <code>https://example.com 1010</code> blocks images and media on Example domain.
+                        <pre>[domain] [resource type(s)]</pre>
+                        <code>s</code> for scripts, <code>i</code> for images, <code>f</code> for fonts and <code>m</code> for media.
+                        E.g. <code>example.com sf</code> allows scripts and fonts on Example domain.
                     </div>
                 </div>
             </div>
