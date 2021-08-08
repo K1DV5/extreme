@@ -78,7 +78,7 @@ document.getElementById('settings').addEventListener('change', event => {
 document.getElementById('apply').addEventListener('click', () => {
     // temporarily set different options
     let allow = Array.from(checkBoard).filter(c => c.checked).map(c => c.id[0]).join('')
-    let pageOpt = sessionConf[currentTabDomain] || config[currentTabDomain]
+    let pageOpt = sessionConf[currentTabDomain] || config[currentTabDomain] || config.default
     if (currentTabDomain == 'default' || allow == pageOpt || !switchCheck.checked)
         return window.close()  // no change
     chrome.runtime.sendMessage({type: 'setSessConf', domain: currentTabDomain, tabId: currentTabId, opts: allow}, () => {
