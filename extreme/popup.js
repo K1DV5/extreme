@@ -7,6 +7,7 @@ const checkBoard = document.querySelectorAll('#pageOpt input[type=checkbox]')
 // state of the config for the page when the popup was opened
 let config = {default: ''}
 let sessionConf = {}
+let pageOptInit  // checked when clicking apply
 // config textarea
 const configText = document.getElementById('config')
 
@@ -41,8 +42,8 @@ async function init() {
         updateSwitchBoard()
         // show loaded outside of config
         let check = ' ' + String.fromCharCode(10003) // U+2713
-        let pageOpt = config[currentTabDomain] || config.default
         let pageSessionOpt = sessionConf[currentTabDomain] || ''
+        pageOptInit = pageSessionOpt || config[currentTabDomain] || config.default
         if (pageSessionOpt.length) {
             for (let widget of checkBoard) {
                 if (pageSessionOpt.includes(widget.id[0])) {
@@ -78,8 +79,7 @@ document.getElementById('settings').addEventListener('change', event => {
 document.getElementById('apply').addEventListener('click', () => {
     // temporarily set different options
     let allow = Array.from(checkBoard).filter(c => c.checked).map(c => c.id[0]).join('')
-    let pageOpt = sessionConf[currentTabDomain] || config[currentTabDomain] || config.default
-    if (currentTabDomain == 'default' || allow == pageOpt || !switchCheck.checked)
+    if (currentTabDomain == 'default' || allow == pageOptInit || !switchCheck.checked)
         return window.close()  // no change
     chrome.runtime.sendMessage({type: 'setSessConf', domain: currentTabDomain, tabId: currentTabId, opts: allow}, () => {
         chrome.tabs.reload(currentTabId)

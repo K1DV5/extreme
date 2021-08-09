@@ -1,8 +1,5 @@
 async function updateDynamicRules(config) {
-    console.log(config)
-    if (!config) {
-        config = {default: ''}
-    }
+    if (!config) config = {default: ''}
     let rules = {
         s: {
             id: 1,
@@ -108,14 +105,11 @@ chrome.runtime.onInstalled.addListener(e => {
 })
 
 
-async function getState() {
-    let sessRule = (await chrome.declarativeNetRequest.getSessionRules())[0]
-    if (!sessRule || sessRule.condition.tabIds) return true
-    return false
-}
-
 async function turn(on) {
-    let stateOn = await getState()
+    let stateOn = false
+    let sessRule = (await chrome.declarativeNetRequest.getSessionRules())[0]
+    if (!sessRule || sessRule.condition.tabIds) stateOn = true
+    if (on === undefined) return stateOn
     if (on) {
         chrome.declarativeNetRequest.setExtensionActionOptions({displayActionCountAsBadgeText: true})
         if (stateOn) return true
@@ -179,7 +173,7 @@ chrome.runtime.onMessage.addListener((message, ctx, sendResponse) => {
     } else if (message == 'switchOff') {
         turn(false).then(sendResponse)
     } else if (message == 'state') {
-        getState().then(sendResponse)
+        turn().then(sendResponse)
     } else if (message === 'config') {
         getConfig().then(sendResponse)
     } else if (message.type == 'setConfig') {
