@@ -46,7 +46,7 @@ the amount of data saved.
 
 There are three stages of unblocking the items.
 
-### Download and show single image
+### Download and show a single image
 
 After a page has loaded, it can be seen that all images (except those with
 `data:` URLs) are blocked. To show an image, you can right-click (or long press
@@ -60,7 +60,9 @@ and it doesn't interfere with subsequent right clicks.
 If the page relies on some part (example: JS scripts) and you want to load the
 JS for just one time, you can click on the icon of the extension on the
 extensions toolbar. This brings some options and you can check what you want
-downloaded and click 'Apply'. This is only for the lifetime of the tab.
+downloaded and click 'Apply'. This is only for the lifetime of the tab, until
+the extension is turned off from the popup, or until 'Apply' is clicked for another
+domain.
 
 ### Save customizations
 
