@@ -60,6 +60,29 @@ async function updateDynamicRules(config) {
 async function updateSessionRules(domain, tabId, opts) {
     let sessRule = (await chrome.declarativeNetRequest.getSessionRules())[0]
     if (sessRule && !sessRule.condition.domains) return // switched off
+    let types = ['script', 'image', 'font', 'media']
+    let toAllow = types.filter(type => opts.includes(type[0]))
+    if (!toAllow.length) {
+        let defaultOpts = (await getConfig()).dynamic.default
+        if (defaultOpts.length) {
+            await chrome.declarativeNetRequest.updateSessionRules({
+                removeRuleIds: [6],
+                addRules: [{
+                    id: 6,
+                    priority: 2,
+                    condition: {
+                        domains: [domain],
+                        tabIds: [tabId],
+                        resourceTypes: types.filter(type => defaultOpts.includes(type[0])),
+                    },
+                    action: {type: 'block'}
+                }]
+            })
+            return
+        }
+        await chrome.declarativeNetRequest.updateSessionRules({removeRuleIds: [6]})
+        return
+    }
     await chrome.declarativeNetRequest.updateSessionRules({
         removeRuleIds: [6],
         addRules: [{
@@ -68,7 +91,7 @@ async function updateSessionRules(domain, tabId, opts) {
             condition: {
                 domains: [domain],
                 tabIds: [tabId],
-                resourceTypes: ['script', 'image', 'font', 'media'].filter(type => opts.includes(type[0]))
+                resourceTypes: toAllow,
             },
             action: {type: 'allow'}
         }]
