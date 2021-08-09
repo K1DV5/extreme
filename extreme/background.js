@@ -111,12 +111,10 @@ async function turn(on) {
     if (!sessRule || sessRule.condition.tabIds) stateOn = true
     if (on === undefined) return stateOn
     if (on) {
-        chrome.declarativeNetRequest.setExtensionActionOptions({displayActionCountAsBadgeText: true})
         if (stateOn) return true
         chrome.declarativeNetRequest.updateSessionRules({removeRuleIds: [6]})
         return true
     } else {
-        chrome.declarativeNetRequest.setExtensionActionOptions({displayActionCountAsBadgeText: false})
         if (!stateOn) return false
         await chrome.declarativeNetRequest.updateSessionRules({
             removeRuleIds: [6],
