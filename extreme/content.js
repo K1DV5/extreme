@@ -16,13 +16,15 @@ function fetchToBlobUrl(url) {
     })
 }
 
+let loadingImage = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em"/>'
+
 document.addEventListener('contextmenu', event => {
     let target = event.target
     if (target.dataset.imageLoaded) return  // set below
     if (target.tagName === 'IMG') {
         let srcPr = fetchToBlobUrl(target.currentSrc)
         if (!srcPr) return  // maybe it's data:
-        target.src = ''
+        target.src = loadingImage
         srcPr.then(src => {
             target.removeAttribute('srcset')
             target.onload = () => URL.revokeObjectURL(src)
@@ -38,7 +40,7 @@ document.addEventListener('contextmenu', event => {
         let urlEnd = bgImg.indexOf('")', urlBegin)
         let urlPr = fetchToBlobUrl(bgImg.slice(urlBegin, urlEnd))
         if (!urlPr) return  // maybe it's data:
-        target.style.backgroundImage = ''
+        target.style.backgroundImage = loadingImage
         urlPr.then(url => {
             target.style.backgroundImage = 'url("' + url + '")'
             target.dataset.imageLoaded = true  // prevent future click from re downloading
