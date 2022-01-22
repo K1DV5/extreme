@@ -32,7 +32,7 @@ async function init() {
     if (currentTab?.url) {  // don't need tabs permission, so don't need to check protocol
         let url = new URL(currentTab.url)
         currentTabId = currentTab.id
-        currentTabDomain = url.host
+        currentTabDomain = url.hostname
     } else {
         currentTabDomain = 'default'
     }
@@ -111,7 +111,7 @@ document.getElementById('save-config').addEventListener('click', event => {
         try {
             url = new URL('https://' + domain)
         } catch {continue}
-        if (url.host !== domain || !opt) continue
+        if (url.hostname !== domain || !opt) continue
         newConfig[domain] = opt
     }
     chrome.runtime.sendMessage({type: 'setConfig', config: newConfig}, () => {
