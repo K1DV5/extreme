@@ -1,4 +1,4 @@
-  {
+{
     "name": "Extreme",
     "version": "2.1.0",
     "description": "Save data by blocking parts of sites",
@@ -6,23 +6,23 @@
         "declarativeNetRequest"
     ],
     "background": {
-      "service_worker": "background.js"
+        "service_worker": "background.js"
     },
     "action": {
-      "default_popup": "popup.html",
-      "default_title": "Extreme",
-      "default_icon": {
+        "default_popup": "popup.html",
+        "default_title": "Extreme",
+        "default_icon": {
+            "16": "images/icon16.png",
+            "32": "images/icon32.png",
+            "48": "images/icon48.png",
+            "128": "images/icon128.png"
+        }
+    },
+    "icons": {
         "16": "images/icon16.png",
         "32": "images/icon32.png",
         "48": "images/icon48.png",
         "128": "images/icon128.png"
-      }
-    },
-    "icons": {
-      "16": "images/icon16.png",
-      "32": "images/icon32.png",
-      "48": "images/icon48.png",
-      "128": "images/icon128.png"
     },
     "manifest_version": 3
-  }
+}
