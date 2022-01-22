@@ -8,6 +8,12 @@ body {
     background-color: #8883;
 }
 
+@media (orientation: portrait) {
+    body {
+        width: 20em;
+    }
+}
+
 header {
     display: flex;
     justify-content: space-between;
