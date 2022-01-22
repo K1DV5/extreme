@@ -12,18 +12,6 @@
     "background": {
       "service_worker": "background.js"
     },
-    "content_scripts": [
-        {
-            "matches": ["http://*/*", "https://*/*"],
-            "js": ["content.js"],
-            "all_frames": true
-        },
-        {
-            "matches": ["http://*.youtube.com/*", "https://*.youtube.com/*"],
-            "js": ["yt.js"],
-            "all_frames": true
-        }
-    ],
     "action": {
       "default_popup": "popup.html",
       "default_title": "Extreme",

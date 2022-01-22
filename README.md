@@ -27,15 +27,6 @@ granular approach could be implemented but since almost all sites implement
 their styles universally across their host name, it would be unnecessary load
 on the browser.
 
-## YouTube videos
-
-YouTube's auto selection of quality eats up a lot of data, especially if it
-detects a fast connection and switches to a high definition version of the
-video. But if the quality is set to a specific value, there will be some
-reduction on data usage. This extension can restrict the playback quality
-of YouTube videos to a specific value, which works both on YouTube's website
-and pages with embedded videos.
- 
 ## `Save-Data` header
 
 Some sites may use less data if the headers of the requests contain the
@@ -44,16 +35,7 @@ the amount of data saved.
 
 ## Customization
 
-There are three stages of unblocking the items.
-
-### Download and show a single image
-
-After a page has loaded, it can be seen that all images (except those with
-`data:` URLs) are blocked. To show an image, you can right-click (or long press
-on the touchscreen) the image. This will not show the context menu but will
-download and show the image. If you really wanted the context menu, you can
-right-click on the image again. The extension only downloads the image once,
-and it doesn't interfere with subsequent right clicks.
+There are two stages of unblocking the items.
 
 ### Change what is blocked once
 

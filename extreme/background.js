@@ -9,7 +9,7 @@ async function updateDynamicRules(config) {
         i: {
             id: 2,
             condition: {resourceTypes: ['image']},
-            action: {type: 'redirect', redirect: {extensionPath: '/redir/empty.svg'}}
+            action: {type: 'block'}
         },
         f: {
             id: 3,
