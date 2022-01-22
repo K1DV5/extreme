@@ -3,15 +3,8 @@
 }
 
 body {
-    width: inherit;
     margin: 0;
     background-color: #8883;
-}
-
-@media (orientation: portrait) {
-    body {
-        width: 20em;
-    }
 }
 
 header {
@@ -82,6 +75,7 @@ textarea {
     width: 100%;
     height: 11em;
     margin-top: 1em;
+    resize: none;
 }
 
 textarea:focus {
