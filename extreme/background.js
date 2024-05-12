@@ -99,7 +99,7 @@ chrome.runtime.onInstalled.addListener(e => {
     chrome.declarativeNetRequest.getDynamicRules().then(rules => {
         if (rules.filter(r => r.id == 5).length == 0) {  // the Save-Data header rule will always be present
             updateDynamicRules()
-            turn(on)
+            turn(true)
         }
     })
 })
