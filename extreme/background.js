@@ -39,10 +39,10 @@ async function updateDynamicRules(config) {
         for (let char of opt || '') {
             let rule = rules[char]
             if (!opt) continue
-            if (!rule.condition.excludedDomains) {
-                rule.condition.excludedDomains = []
+            if (!rule.condition.excludedInitiatorDomains) {
+                rule.condition.excludedInitiatorDomains = []
             }
-            rule.condition.excludedDomains.push(domain)
+            rule.condition.excludedInitiatorDomains.push(domain)
         }
     }
     for (let char of defaultOpts) {
@@ -56,7 +56,7 @@ async function updateDynamicRules(config) {
 
 async function updateSessionRules(domain, tabId, opts) {
     let sessRule = (await chrome.declarativeNetRequest.getSessionRules())[0]
-    if (sessRule && !sessRule.condition.domains) return // switched off
+    if (sessRule && !sessRule.condition.initiatorDomains) return // switched off
     let types = ['script', 'image', 'font', 'media']
     let toAllow = types.filter(type => opts.includes(type[0]))
     if (!toAllow.length) {
@@ -68,7 +68,7 @@ async function updateSessionRules(domain, tabId, opts) {
                     id: 6,
                     priority: 2,
                     condition: {
-                        domains: [domain],
+                        initiatorDomains: [domain],
                         tabIds: [tabId],
                         resourceTypes: types.filter(type => defaultOpts.includes(type[0])),
                     },
@@ -86,7 +86,7 @@ async function updateSessionRules(domain, tabId, opts) {
             id: 6,
             priority: 2,
             condition: {
-                domains: [domain],
+                initiatorDomains: [domain],
                 tabIds: [tabId],
                 resourceTypes: toAllow,
             },
@@ -96,12 +96,8 @@ async function updateSessionRules(domain, tabId, opts) {
 }
 
 chrome.runtime.onInstalled.addListener(e => {
-    chrome.declarativeNetRequest.getDynamicRules().then(rules => {
-        if (rules.filter(r => r.id == 5).length == 0) {  // the Save-Data header rule will always be present
-            updateDynamicRules()
-            turn(true)
-        }
-    })
+    updateDynamicRules()
+    turn(true)
 })
 
 
@@ -136,8 +132,8 @@ async function getConfig() {
         if (rule.id === 5) break
         let type = rule.condition.resourceTypes[0][0]
         config.default = config.default.replace(type, '')
-        if (!rule.condition.excludedDomains) continue
-        for (let domain of rule.condition.excludedDomains) {
+        if (!rule.condition.excludedInitiatorDomains) continue
+        for (let domain of rule.condition.excludedInitiatorDomains) {
             if (!config.hasOwnProperty(domain)) {
                 config[domain] = ''
             }
@@ -146,8 +142,8 @@ async function getConfig() {
     }
     let sessRule = (await chrome.declarativeNetRequest.getSessionRules())[0]
     let session = {}
-    if (sessRule && sessRule.condition.domains) {
-        session[sessRule.condition.domains[0]] = sessRule.condition.resourceTypes.map(type => type[0]).join('')
+    if (sessRule && sessRule.condition.initiatorDomains) {
+        session[sessRule.condition.initiatorDomains[0]] = sessRule.condition.resourceTypes.map(type => type[0]).join('')
     }
     return {dynamic: config, session}
 }
